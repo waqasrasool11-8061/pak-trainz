@@ -101,23 +101,29 @@
             </div>
 
             <div class="gallery video-gallery" id="homeVideoGrid">
-                <!-- Populated dynamically with fallback -->
-                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/1.mp4" tabindex="0" role="button" aria-label="Play video 1">
-                    <div class="video-thumb" aria-hidden="true"></div>
+                <!-- High quality cards with actual Pakistan Railways locomotive thumbnails -->
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/1.mp4" data-video-title="Trainz Rail Simulator Video 1" tabindex="0" role="button" aria-label="Play video 1">
+                    <div class="video-thumb">
+                        <img src="Pictures%20%26%20Videos/1.png" alt="Video 1" class="video-thumb-img">
+                    </div>
                     <div class="video-card-overlay">
                         <span class="video-play-btn" aria-hidden="true"></span>
                         <span class="video-card-label">Video 1</span>
                     </div>
                 </figure>
-                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/2.mp4" tabindex="0" role="button" aria-label="Play video 2">
-                    <div class="video-thumb" aria-hidden="true"></div>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/2.mp4" data-video-title="Trainz Rail Simulator Video 2" tabindex="0" role="button" aria-label="Play video 2">
+                    <div class="video-thumb">
+                        <img src="Pictures%20%26%20Videos/2.JPEG" alt="Video 2" class="video-thumb-img">
+                    </div>
                     <div class="video-card-overlay">
                         <span class="video-play-btn" aria-hidden="true"></span>
                         <span class="video-card-label">Video 2</span>
                     </div>
                 </figure>
-                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/3.mp4" tabindex="0" role="button" aria-label="Play video 3">
-                    <div class="video-thumb" aria-hidden="true"></div>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/3.mp4" data-video-title="Trainz Rail Simulator Video 3" tabindex="0" role="button" aria-label="Play video 3">
+                    <div class="video-thumb">
+                        <img src="Pictures%20%26%20Videos/3.png" alt="Video 3" class="video-thumb-img">
+                    </div>
                     <div class="video-card-overlay">
                         <span class="video-play-btn" aria-hidden="true"></span>
                         <span class="video-card-label">Video 3</span>
@@ -331,9 +337,11 @@
         const videoContainer = document.getElementById('videoContainer');
         const videoCloseButton = videoLightbox.querySelector('.lightbox-close');
 
-        function openVideoModal(source) {
+        function openVideoModal(source, title) {
             if (!source) return;
-            // Check if YouTube
+            videoContainer.innerHTML = '';
+
+            // 1. Check if YouTube link
             if (source.includes('youtube.com') || source.includes('youtu.be')) {
                 let embedUrl = source;
                 if (source.includes('watch?v=')) {
@@ -343,10 +351,51 @@
                     const vId = source.split('youtu.be/')[1].split('?')[0];
                     embedUrl = `https://www.youtube.com/embed/${vId}?autoplay=1`;
                 }
-                videoContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="520" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:14px;"></iframe>`;
-            } else {
-                videoContainer.innerHTML = `<video id="videoLightboxPlayer" controls autoplay playsinline poster="Pictures & Videos/video-thumbnail.svg" style="width: 100%; height: auto; border-radius: 14px;"><source src="${source}" type="video/mp4"></video>`;
+                videoContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="520" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:14px; border:none;"></iframe>`;
+                videoLightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                return;
             }
+
+            // 2. Check if Google Drive preview link
+            if (source.includes('drive.google.com')) {
+                let driveUrl = source;
+                if (source.includes('/view')) driveUrl = source.replace('/view', '/preview');
+                videoContainer.innerHTML = `<iframe src="${driveUrl}" width="100%" height="520" frameborder="0" allow="autoplay" allowfullscreen style="border-radius:14px; border:none;"></iframe>`;
+                videoLightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                return;
+            }
+
+            // 3. HTML5 Video Player with error fallback for cloud hosts
+            const videoEl = document.createElement('video');
+            videoEl.id = 'videoLightboxPlayer';
+            videoEl.controls = true;
+            videoEl.autoplay = true;
+            videoEl.playsInline = true;
+            videoEl.style.width = '100%';
+            videoEl.style.maxHeight = '80vh';
+            videoEl.style.borderRadius = '14px';
+            videoEl.style.background = '#000';
+            videoEl.src = source;
+
+            videoEl.addEventListener('error', () => {
+                videoContainer.innerHTML = `
+                    <div class="video-offline-card">
+                        <div style="font-size: 3.2rem; margin-bottom: 8px;">🚂</div>
+                        <h3 style="margin: 0 0 10px; color: #fff; font-size: 1.35rem;">${escapeHtml(title || 'Pakistan Railways Simulation Video')}</h3>
+                        <p style="color: #cbd5e1; margin: 0 auto 22px; font-size: 0.95rem; line-height: 1.55;">
+                            Due to cloud hosting 100MB file limits, this 1080p full gameplay video is hosted on our official YouTube channel. You can watch it in full HD right now:
+                        </p>
+                        <a href="https://youtube.com/@trainzcontentsdeveloper?si=_u6V5TV9xvOahG_n" target="_blank" rel="noopener noreferrer" class="btn primary" style="display:inline-flex; align-items:center; gap:8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.5 7.2a3 3 0 0 0-2.1-2.1C19.6 4.5 12 4.5 12 4.5s-7.6 0-9.4.6A3 3 0 0 0 .5 7.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-4.8z"/><path fill="#fff" d="M9.8 15.5V8.5L16 12l-6.2 3.5z"/></svg>
+                            Watch on Official YouTube Channel
+                        </a>
+                    </div>
+                `;
+            });
+
+            videoContainer.appendChild(videoEl);
             videoLightbox.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -369,7 +418,7 @@
 
         // Attach listeners to video items
         document.querySelectorAll('.video-item').forEach(item => {
-            item.addEventListener('click', () => openVideoModal(item.dataset.videoSrc));
+            item.addEventListener('click', () => openVideoModal(item.dataset.videoSrc, item.dataset.videoTitle));
         });
 
         // Initialize on DOM load

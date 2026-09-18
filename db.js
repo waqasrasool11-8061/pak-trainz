@@ -195,13 +195,22 @@ async function initDatabase() {
     const vidRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_videos");
     const vidCount = Number(vidRes.rows[0]?.cnt ?? vidRes.rows[0]?.[0] ?? 0);
     if (vidCount === 0) {
+      const videoThumbs = [
+        "Pictures & Videos/1.png",
+        "Pictures & Videos/2.JPEG",
+        "Pictures & Videos/3.png",
+        "Pictures & Videos/4.png",
+        "Pictures & Videos/5.png",
+        "Pictures & Videos/6.png",
+        "Pictures & Videos/7.png"
+      ];
       for (let i = 1; i <= 7; i++) {
         await db.execute({
           sql: "INSERT INTO pak_videos (title, video_url, thumbnail_url, sort_order) VALUES (?, ?, ?, ?)",
           args: [
             "Trainz Rail Simulator Video " + i,
             "Pictures & Videos/" + i + ".mp4",
-            "Pictures & Videos/video-thumbnail.svg",
+            videoThumbs[i - 1],
             i
           ]
         });
