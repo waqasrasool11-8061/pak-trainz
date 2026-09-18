@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pak Trainz | Gameplay & Sound Tests</title>
+    <link rel="icon" type="image/x-icon" href="Pictures & Videos/Pak-Trainz.jpg">
+    <link rel="stylesheet" href="Pak-Trainz.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/">
+            <img src="Pictures & Videos/Pak-Trainz.jpg" alt="Pak Trainz logo">
+            <span>Pak Trainz</span>
+        </a>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="gallery.html">Gallery</a>
+            <a href="videos.html" style="background: rgba(255,255,255,0.18);">Videos</a>
+            <a href="/#downloads">Downloads</a>
+            <a href="/#about">About</a>
+            <a href="/#contact">Contact</a>
+            <a href="admin.html">⚙️ Admin</a>
+        </nav>
+    </header>
+
+    <main class="page">
+        <section class="content-block" id="videos">
+            <div class="section-heading">
+                <p class="eyebrow">Audio & Visuals</p>
+                <h2>Pakistan Railways Simulator Videos</h2>
+                <p>Full-throttle engine runbys, authentic diesel horn showcases, and driver cab perspectives. Click any card to play in high definition.</p>
+            </div>
+
+            <div class="gallery video-gallery" id="videoGrid">
+                <!-- Fallback items -->
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/1.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 1</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/2.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 2</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/3.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 3</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/4.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 4</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/5.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 5</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/6.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 6</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/7.mp4" tabindex="0" role="button">
+                    <div class="video-thumb" aria-hidden="true"></div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 7</span>
+                    </div>
+                </figure>
+            </div>
+        </section>
+    </main>
+
+    <div id="videoLightbox" class="lightbox" aria-hidden="true">
+        <button class="lightbox-close" aria-label="Close video preview">×</button>
+        <div id="videoContainer" style="width: min(100%, 960px); max-height: 90vh;">
+            <video id="videoLightboxPlayer" controls autoplay playsinline poster="Pictures & Videos/video-thumbnail.svg" style="width:100%; height:auto; border-radius:14px;">
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <script>
+        const videoLightbox = document.getElementById('videoLightbox');
+        const videoContainer = document.getElementById('videoContainer');
+        const videoCloseButton = videoLightbox.querySelector('.lightbox-close');
+
+        function openVideo(source) {
+            if (!source) return;
+            if (source.includes('youtube.com') || source.includes('youtu.be')) {
+                let embedUrl = source;
+                if (source.includes('watch?v=')) {
+                    const vId = source.split('watch?v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${vId}?autoplay=1`;
+                } else if (source.includes('youtu.be/')) {
+                    const vId = source.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${vId}?autoplay=1`;
+                }
+                videoContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="520" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:14px;"></iframe>`;
+            } else {
+                videoContainer.innerHTML = `<video id="videoLightboxPlayer" controls autoplay playsinline poster="Pictures & Videos/video-thumbnail.svg" style="width: 100%; height: auto; border-radius: 14px;"><source src="${source}" type="video/mp4"></video>`;
+            }
+            videoLightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideo() {
+            videoLightbox.classList.remove('active');
+            videoContainer.innerHTML = '';
+            document.body.style.overflow = '';
+        }
+
+        videoCloseButton.addEventListener('click', closeVideo);
+        videoLightbox.addEventListener('click', (e) => {
+            if (e.target === videoLightbox) closeVideo();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeVideo();
+        });
+
+        function bindVideoEvents() {
+            document.querySelectorAll('.video-item').forEach((item) => {
+                item.onclick = () => openVideo(item.dataset.videoSrc);
+                item.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openVideo(item.dataset.videoSrc);
+                    }
+                };
+            });
+        }
+
+        // Dynamic fetch from DB
+        async function loadDynamicVideos() {
+            try {
+                const res = await fetch('/api/videos');
+                const data = await res.json();
+                if (data.success && data.videos && data.videos.length > 0) {
+                    const grid = document.getElementById('videoGrid');
+                    grid.innerHTML = data.videos.map(item => `
+                        <figure class="gallery-item video-item" data-video-src="${encodeURI(item.video_url)}" tabindex="0" role="button" aria-label="${escapeHtml(item.title)}">
+                            <div class="video-thumb" style="background: linear-gradient(180deg, rgba(8, 16, 30, 0.4), rgba(8, 16, 30, 0.8)), url('${item.thumbnail_url || "Pictures & Videos/video-thumbnail.svg"}') center/cover no-repeat;"></div>
+                            <div class="video-card-overlay">
+                                <span class="video-play-btn" aria-hidden="true"></span>
+                                <span class="video-card-label">${escapeHtml(item.title)}</span>
+                            </div>
+                        </figure>
+                    `).join('');
+                }
+            } catch (err) {
+                console.log('Using default video fallback');
+            }
+            bindVideoEvents();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDynamicVideos);
+    </script>
+</body>
+</html>

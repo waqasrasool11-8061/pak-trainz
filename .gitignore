@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.log
+*.db
+.DS_Store
+
+# Exclude large binary game files and videos (>100MB GitHub limit)
+*.mp4
+*.cdp
+"Pictures & Videos/*.mp4"
+"Pictures & Videos/*.cdp"
