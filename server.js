@@ -295,6 +295,29 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
   }
 });
 
+// Edit / Update Product (Price, Sale Price, Title, etc.)
+app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updated = await db.updateProduct(id, req.body);
+    res.json({ success: true, message: "Product updated successfully", product: updated });
+  } catch (err) {
+    console.error("Update product error:", err);
+    res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
+app.post("/api/admin/products/:id/edit", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updated = await db.updateProduct(id, req.body);
+    res.json({ success: true, message: "Product updated successfully", product: updated });
+  } catch (err) {
+    console.error("Update product error:", err);
+    res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
 // Delete Store Product
 app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   try {
@@ -304,6 +327,32 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   } catch (err) {
     console.error("Delete product error:", err);
     res.status(500).json({ error: "Failed to delete product" });
+  }
+});
+
+// ──────────────────────────────────────────
+// PAYMENT ACCOUNTS SETTINGS APIS
+// ──────────────────────────────────────────
+
+// Public: Get Active Payment Accounts for Checkout
+app.get("/api/payment-methods", async (req, res) => {
+  try {
+    const settings = await db.getPaymentSettings();
+    res.json({ success: true, settings });
+  } catch (err) {
+    console.error("Error fetching payment methods:", err);
+    res.status(500).json({ error: "Failed to load payment methods" });
+  }
+});
+
+// Admin: Update Payment Accounts (EasyPaisa, JazzCash, Bank, WhatsApp)
+app.post("/api/admin/payment-settings", requireAdmin, async (req, res) => {
+  try {
+    const updated = await db.updatePaymentSettings(req.body);
+    res.json({ success: true, message: "Payment accounts updated successfully", settings: updated });
+  } catch (err) {
+    console.error("Error updating payment settings:", err);
+    res.status(500).json({ error: "Failed to update payment settings" });
   }
 });
 

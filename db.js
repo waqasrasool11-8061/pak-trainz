@@ -154,6 +154,44 @@ async function initDatabase() {
     );
   `);
 
+  // Payment & Store Settings Table
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS pak_settings (
+      setting_key TEXT PRIMARY KEY,
+      setting_value TEXT NOT NULL
+    );
+  `);
+
+  // Seed default payment accounts if empty
+  try {
+    const setRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_settings");
+    const setCount = Number(setRes.rows[0]?.cnt ?? setRes.rows[0]?.[0] ?? 0);
+    if (setCount === 0) {
+      const defaultSettings = [
+        { key: "easypaisa_title", value: "Waqas Rasool / TRS DEP PAK" },
+        { key: "easypaisa_number", value: "0300-1234567" },
+        { key: "jazzcash_title", value: "Waqas Rasool / Pak Trainz" },
+        { key: "jazzcash_number", value: "0300-1234567" },
+        { key: "sadapay_title", value: "Waqas Rasool" },
+        { key: "sadapay_number", value: "0300-1234567" },
+        { key: "bank_name", value: "Meezan Bank" },
+        { key: "bank_title", value: "Waqas Rasool" },
+        { key: "bank_account", value: "0102-xxxxxxxxxxx" },
+        { key: "bank_raast", value: "03001234567" },
+        { key: "whatsapp_number", value: "03001234567" }
+      ];
+      for (const s of defaultSettings) {
+        await db.execute({
+          sql: "INSERT OR REPLACE INTO pak_settings (setting_key, setting_value) VALUES (?, ?)",
+          args: [s.key, s.value]
+        });
+      }
+      console.log("[db] Initialized default payment settings");
+    }
+  } catch (err) {
+    console.error("[db] Error seeding settings:", err.message);
+  }
+
   // Seed default admin if empty
   try {
     const adminRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_admins");
@@ -528,12 +566,73 @@ async function addProduct(data) {
   return res.lastInsertRowid;
 }
 
+async function updateProduct(id, data) {
+  const db = getClient();
+  await db.execute({
+    sql: `UPDATE pak_products SET
+      title = ?,
+      category = ?,
+      price = ?,
+      sale_price = ?,
+      badge = ?,
+      version = ?,
+      file_size = ?,
+      file_url = ?,
+      image_url = ?,
+      kuid_info = ?,
+      description = ?
+    WHERE id = ?`,
+    args: [
+      data.title,
+      data.category || "Locomotives",
+      Number(data.price) || 0,
+      data.sale_price ? Number(data.sale_price) : null,
+      data.badge || "",
+      data.version || "TRS19 / TRS22",
+      data.file_size || "",
+      data.file_url,
+      data.image_url || "Pictures & Videos/1.png",
+      data.kuid_info || "",
+      data.description || "",
+      id
+    ]
+  });
+  return await getProductById(id);
+}
+
 async function deleteProduct(id) {
   const db = getClient();
   await db.execute({
     sql: "DELETE FROM pak_products WHERE id = ?",
     args: [id]
   });
+}
+
+// ──────────────────────────────────────────
+// PAYMENT SETTINGS METHODS
+// ──────────────────────────────────────────
+
+async function getPaymentSettings() {
+  const db = getClient();
+  const res = await db.execute("SELECT * FROM pak_settings");
+  const settings = {};
+  for (const r of res.rows) {
+    settings[String(r.setting_key)] = String(r.setting_value);
+  }
+  return settings;
+}
+
+async function updatePaymentSettings(data) {
+  const db = getClient();
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined && value !== null) {
+      await db.execute({
+        sql: "INSERT OR REPLACE INTO pak_settings (setting_key, setting_value) VALUES (?, ?)",
+        args: [key, String(value).trim()]
+      });
+    }
+  }
+  return await getPaymentSettings();
 }
 
 // ──────────────────────────────────────────
@@ -993,7 +1092,11 @@ module.exports = {
   getProducts,
   getProductById,
   addProduct,
+  updateProduct,
   deleteProduct,
+  // Payment Accounts & Settings
+  getPaymentSettings,
+  updatePaymentSettings,
   // Orders & Licenses
   createOrder,
   getOrder,

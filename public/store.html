@@ -922,15 +922,43 @@
         }
 
         // Checkout Modal Actions
-        function openCheckoutModal() {
+        async function openCheckoutModal() {
             if (!cart.length) return;
             toggleCartDrawer(false);
+            await fetchPaymentMethods();
             updatePaymentInstructions();
             document.getElementById('checkoutModal').classList.add('open');
         }
 
         function closeCheckoutModal() {
             document.getElementById('checkoutModal').classList.remove('open');
+        }
+
+        let activePaymentSettings = {
+            easypaisa_title: "Waqas Rasool / TRS DEP PAK",
+            easypaisa_number: "0300-1234567",
+            jazzcash_title: "Waqas Rasool / Pak Trainz",
+            jazzcash_number: "0300-1234567",
+            sadapay_title: "Waqas Rasool",
+            sadapay_number: "0300-1234567",
+            bank_name: "Meezan Bank",
+            bank_title: "Waqas Rasool",
+            bank_account: "0102-xxxxxxxxxxx",
+            bank_raast: "03001234567",
+            whatsapp_number: "03001234567"
+        };
+
+        async function fetchPaymentMethods() {
+            try {
+                const res = await fetch('/api/payment-methods');
+                const data = await res.json();
+                if (data.success && data.settings) {
+                    activePaymentSettings = { ...activePaymentSettings, ...data.settings };
+                    updatePaymentInstructions();
+                }
+            } catch (e) {
+                console.warn("Using default payment instructions");
+            }
         }
 
         function updatePaymentInstructions() {
@@ -942,18 +970,19 @@
             let subtotal = cart.reduce((sum, i) => sum + i.price, 0);
             totalEl.innerText = `Rs. ${subtotal}`;
 
+            const s = activePaymentSettings;
             if (method === 'EasyPaisa') {
-                titleEl.innerText = "Waqas Rasool / TRS DEP PAK";
-                numEl.innerText = "0300-1234567 (EasyPaisa)";
+                titleEl.innerText = s.easypaisa_title || "Waqas Rasool / TRS DEP PAK";
+                numEl.innerText = `${s.easypaisa_number || '0300-1234567'} (EasyPaisa Account)`;
             } else if (method === 'JazzCash') {
-                titleEl.innerText = "Waqas Rasool / Pak Trainz";
-                numEl.innerText = "0300-1234567 (JazzCash)";
+                titleEl.innerText = s.jazzcash_title || "Waqas Rasool / Pak Trainz";
+                numEl.innerText = `${s.jazzcash_number || '0300-1234567'} (JazzCash Account)`;
             } else if (method === 'SadaPay') {
-                titleEl.innerText = "Waqas Rasool";
-                numEl.innerText = "0300-1234567 (SadaPay Wallet)";
+                titleEl.innerText = s.sadapay_title || "Waqas Rasool";
+                numEl.innerText = `${s.sadapay_number || '0300-1234567'} (SadaPay / NayaPay Wallet)`;
             } else {
-                titleEl.innerText = "TRS DEP PAK / Waqas Rasool";
-                numEl.innerText = "Raast ID: 03001234567 | Meezan Bank: 0102-xxxxxxxxxxx";
+                titleEl.innerText = `${s.bank_title || 'Waqas Rasool'} (${s.bank_name || 'Bank Account'})`;
+                numEl.innerText = `A/C or IBAN: ${s.bank_account || '0102-xxxxxxxx'} | Raast: ${s.bank_raast || '03001234567'}`;
             }
         }
 
@@ -1099,6 +1128,8 @@
                         </div>
                     `;
                 } else {
+                    const wpNum = (activePaymentSettings.whatsapp_number || '923001234567').replace(/[^0-9]/g, '');
+                    const wpUrl = `https://wa.me/${wpNum}?text=Assalam-o-Alaikum,%20maine%20TRS%20DEP%20PAK%20ka%20order%20place%20kiya%20hai%20Order%20ID:%20${o.order_number}%20TID:%20${o.transaction_id}`;
                     downloadSection = `
                         <div style="background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:12px; padding:16px; margin-top:20px;">
                             <h4 style="color:#f59e0b; margin:0 0 6px 0;">⏳ Verification Pending</h4>
@@ -1107,8 +1138,8 @@
                             </p>
                             <p style="margin:8px 0 0 0; font-size:0.85rem;">
                                 Quick approval ke liye WhatsApp par message karein: 
-                                <a href="https://wa.me/923001234567?text=Assalam-o-Alaikum,%20maine%20TRS%20DEP%20PAK%20ka%20order%20place%20kiya%20hai%20Order%20ID:%20${o.order_number}" target="_blank" style="color:#64b5f6; font-weight:bold; text-decoration:underline;">
-                                    WhatsApp Support
+                                <a href="${wpUrl}" target="_blank" style="color:#64b5f6; font-weight:bold; text-decoration:underline;">
+                                    WhatsApp Support (${activePaymentSettings.whatsapp_number || 'Official'})
                                 </a>
                             </p>
                         </div>
@@ -1146,6 +1177,7 @@
         // On Page Load: Check URL for ?order=TRS-ORD-xxxx
         window.addEventListener('DOMContentLoaded', () => {
             fetchProducts();
+            fetchPaymentMethods();
             loadCartFromStorage();
 
             const urlParams = new URLSearchParams(window.location.search);
