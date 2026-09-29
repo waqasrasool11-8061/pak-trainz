@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pak Trainz | Admin Studio & Management Portal</title>
+    <link rel="icon" type="image/x-icon" href="Pictures & Videos/Pak-Trainz.jpg">
+    <link rel="stylesheet" href="Pak-Trainz.css">
+    <style>
+        .badge-status {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .status-approved { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .status-rejected { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+        .btn-approve:hover { background: #34d399; }
+    </style>
+</head>
+<body class="admin-body">
+    <!-- Top Bar -->
+    <header class="topbar">
+        <a class="brand" href="/">
+            <img src="Pictures & Videos/Pak-Trainz.jpg" alt="Pak Trainz logo">
+            <span>Pak Trainz ADMIN STUDIO</span>
+        </a>
+        <nav class="nav-links">
+            <a href="/" target="_blank">🌐 View Website</a>
+            <a href="/store.html" target="_blank">🛒 View Store</a>
+            <button id="btnChangePassword" class="btn secondary" style="padding: 6px 14px; font-size: 0.85rem; display: none;">🔑 Change Password</button>
+            <button id="btnLogout" class="btn primary" style="padding: 6px 14px; font-size: 0.85rem; background: #d32f2f; display: none;">Logout</button>
+        </nav>
+    </header>
+
+    <main class="page admin-page">
+        <!-- 1. LOGIN SCREEN -->
+        <div id="loginScreen" class="admin-auth-card">
+            <div class="auth-icon-wrap">
+                <img src="Pictures & Videos/Pak-Trainz.jpg" alt="Logo" class="auth-avatar">
+            </div>
+            <h2>Admin Portal Login</h2>
+            <p class="auth-sub">Access the Pakistan Railways simulation management dashboard to manage orders, products, downloads, pictures &amp; videos.</p>
+
+            <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginUsername">Admin Username</label>
+                    <input type="text" id="loginUsername" required placeholder="Enter username (Default: admin)" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter password (Default: trainz123)" autocomplete="current-password">
+                </div>
+                <div id="loginAlert" class="auth-alert" style="display: none;"></div>
+                <button type="submit" id="loginBtn" class="btn primary" style="width: 100%; margin-top: 10px;">
+                    Sign In to Dashboard
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. MAIN DASHBOARD SCREEN (Visible when authenticated) -->
+        <div id="dashboardScreen" style="display: none;">
+            <!-- Stats Overview Row -->
+            <div class="stats-overview">
+                <div class="stat-card" style="border-color: rgba(56, 189, 248, 0.4);">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="statRevenue">Rs. 0</span>
+                        <span class="stat-lbl">Total Store Revenue</span>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-color: rgba(245, 158, 11, 0.4);">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="statPendingOrders">0</span>
+                        <span class="stat-lbl">Pending Orders</span>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.4);">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="statApprovedOrders">0</span>
+                        <span class="stat-lbl">Approved Orders</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💎</div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="statStoreProducts">0</span>
+                        <span class="stat-lbl">Store Products</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📥</div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="statDownloads">0</span>
+                        <span class="stat-lbl">Free Download Packs</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <span class="stat-val" id="statClicks">0</span>
+                        <span class="stat-lbl">Total Download Clicks</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('orders')">🛒 Customer Orders</button>
+                <button class="tab-btn" onclick="switchTab('products')">💎 Store Products</button>
+                <button class="tab-btn" onclick="switchTab('downloads')">📥 Downloads (.cdp)</button>
+                <button class="tab-btn" onclick="switchTab('gallery')">🖼️ Gallery Photos</button>
+                <button class="tab-btn" onclick="switchTab('videos')">🎬 Video Showcases</button>
+            </div>
+
+            <!-- TAB: CUSTOMER ORDERS -->
+            <div id="tab-orders" class="admin-tab-pane active">
+                <div style="background: rgba(11,23,51,0.85); border: 1px solid rgba(255,255,255,0.12); border-radius:18px; padding:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="margin:0; color:#fff; font-size:1.3rem;">Customer Orders &amp; Digital Licenses</h3>
+                            <p style="margin:4px 0 0 0; color:#94a3b8; font-size:0.88rem;">
+                                Verify payments received via EasyPaisa, JazzCash or Bank. Clicking "Approve" unlocks the download and generates a unique License Key for the buyer.
+                            </p>
+                        </div>
+                        <button class="btn secondary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="loadAdminOrders()">🔄 Refresh Orders</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order # &amp; Date</th>
+                                    <th>Customer Info</th>
+                                    <th>Items</th>
+                                    <th>Total &amp; Payment</th>
+                                    <th>Transaction ID (TID)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">Loading orders...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: STORE PRODUCTS -->
+            <div id="tab-products" class="admin-tab-pane">
+                <div class="admin-panel-split">
+                    <!-- Form: Add Product -->
+                    <div class="admin-form-panel">
+                        <h3>Publish Store Product</h3>
+                        <p class="panel-desc">Add new locomotives, rolling stock, or route packs to the official store.</p>
+                        
+                        <form id="addProductForm" onsubmit="handleAddProduct(event)">
+                            <div class="form-group">
+                                <label>Product Title *</label>
+                                <input type="text" id="prodTitle" required placeholder="e.g. PR HGMU-30 Class 8213 Master Pack">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Category *</label>
+                                    <select id="prodCategory" required>
+                                        <option value="Locomotives">Locomotives</option>
+                                        <option value="Rolling Stock">Rolling Stock</option>
+                                        <option value="Routes">Routes &amp; Scenery</option>
+                                        <option value="Dependencies">Dependencies</option>
+                                        <option value="Sounds & Horns">Sounds &amp; Horns</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Badge Tag</label>
+                                    <input type="text" id="prodBadge" placeholder="e.g. HOT, NEW, SALE, FREE">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Price (PKR) *</label>
+                                    <input type="number" id="prodPrice" required placeholder="499" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Sale Price (Optional)</label>
+                                    <input type="number" id="prodSalePrice" placeholder="399" min="0">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Trainz Version</label>
+                                    <input type="text" id="prodVersion" value="TRS19 / TRS22" placeholder="TRS19 / TRS22">
+                                </div>
+                                <div class="form-group">
+                                    <label>File Size</label>
+                                    <input type="text" id="prodSize" placeholder="e.g. 200.5 MB">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>CDP Download File URL *</label>
+                                <input type="text" id="prodFileUrl" required placeholder="Cloudflare R2 link, Google Drive link, or Pictures & Videos/filename.cdp">
+                            </div>
+                            <div class="form-group">
+                                <label>Product Image URL</label>
+                                <input type="text" id="prodImageUrl" placeholder="Pictures & Videos/1.png">
+                            </div>
+                            <div class="form-group">
+                                <label>KUID Info (Optional)</label>
+                                <input type="text" id="prodKuid" placeholder="e.g. <kuid:8213:1001>">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="prodDesc" rows="2" placeholder="Features, author credits, and model specifications"></textarea>
+                            </div>
+                            <button type="submit" class="btn primary" style="width: 100%;">➕ Publish Store Product</button>
+                        </form>
+                    </div>
+
+                    <!-- Table: Store Products -->
+                    <div class="admin-table-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                            <h3>Store Products (<span id="prodCountSpan">0</span>)</h3>
+                            <button class="btn secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="loadAdminProducts()">🔄 Refresh</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product Title</th>
+                                        <th>Price (PKR)</th>
+                                        <th>Downloads</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 1: DOWNLOADS -->
+            <div id="tab-downloads" class="admin-tab-pane">
+                <div class="admin-panel-split">
+                    <!-- Form: Add Pack -->
+                    <div class="admin-form-panel">
+                        <h3>Add New Download Pack</h3>
+                        <p class="panel-desc">Publish locomotive CDP files, route assets or coach addons. For cloud hosting, paste Google Drive or MediaFire link.</p>
+                        
+                        <form id="addDownloadForm" onsubmit="handleAddDownload(event)">
+                            <div class="form-group">
+                                <label>Pack Title *</label>
+                                <input type="text" id="dlTitle" required placeholder="e.g. PR HGMU-30 Class 8213.cdp">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Category *</label>
+                                    <select id="dlCategory" required>
+                                        <option value="Locomotives">Locomotives</option>
+                                        <option value="Routes">Routes</option>
+                                        <option value="Rolling Stock">Rolling Stock</option>
+                                        <option value="Dependencies">Dependencies</option>
+                                        <option value="Sounds & Horns">Sounds &amp; Horns</option>
+                                        <option value="General">Other / General</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>File Size</label>
+                                    <input type="text" id="dlSize" placeholder="e.g. 185 MB">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Trainz Game Version</label>
+                                    <input type="text" id="dlVersion" value="TRS19 / TRS22" placeholder="e.g. TRS19 / TRS22">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Download Link / File URL *</label>
+                                <input type="text" id="dlUrl" required placeholder="https://drive.google.com/... or Pictures & Videos/filename.cdp">
+                                <small style="color: #9ab4d8;">Google Drive, MediaFire, or local filename</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Description (Optional)</label>
+                                <textarea id="dlDesc" rows="2" placeholder="Brief details about the model, author credits, or installation notes"></textarea>
+                            </div>
+                            <button type="submit" class="btn primary" style="width: 100%;">➕ Publish Download Pack</button>
+                        </form>
+                    </div>
+
+                    <!-- Table: Existing Downloads -->
+                    <div class="admin-table-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                            <h3>Published Packs (<span id="dlCountSpan">0</span>)</h3>
+                            <button class="btn secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="loadAdminDownloads()">🔄 Refresh</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title &amp; Category</th>
+                                        <th>Size</th>
+                                        <th>Clicks</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="downloadsTableBody">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: GALLERY -->
+            <div id="tab-gallery" class="admin-tab-pane">
+                <div class="admin-panel-split">
+                    <!-- Form: Add Image -->
+                    <div class="admin-form-panel">
+                        <h3>Add Gallery Picture</h3>
+                        <p class="panel-desc">Add a Pakistan Railways locomotive or route screenshot to the public gallery.</p>
+                        
+                        <form id="addImageForm" onsubmit="handleAddImage(event)">
+                            <div class="form-group">
+                                <label>Picture Title *</label>
+                                <input type="text" id="imgTitle" required placeholder="e.g. Pakistan Railways HGMU-30 in Rohri Yard">
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL / Path *</label>
+                                <input type="text" id="imgUrl" required placeholder="Pictures & Videos/1.png or web URL">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <input type="text" id="imgCategory" value="Locomotives & Routes" placeholder="Locomotives & Routes">
+                                </div>
+                                <div class="form-group">
+                                    <label>Sort Order</label>
+                                    <input type="number" id="imgOrder" value="0" placeholder="0">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn primary" style="width: 100%;">➕ Add Picture to Gallery</button>
+                        </form>
+                    </div>
+
+                    <!-- Grid: Existing Images -->
+                    <div class="admin-table-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                            <h3>Gallery Pictures (<span id="galCountSpan">0</span>)</h3>
+                            <button class="btn secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="loadAdminGallery()">🔄 Refresh</button>
+                        </div>
+                        <div class="admin-media-grid" id="galleryGridAdmin">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: VIDEOS -->
+            <div id="tab-videos" class="admin-tab-pane">
+                <div class="admin-panel-split">
+                    <!-- Form: Add Video -->
+                    <div class="admin-form-panel">
+                        <h3>Add Video Showcase</h3>
+                        <p class="panel-desc">Add YouTube embeds or gameplay video clips to the showcase gallery.</p>
+                        
+                        <form id="addVideoForm" onsubmit="handleAddVideo(event)">
+                            <div class="form-group">
+                                <label>Video Title *</label>
+                                <input type="text" id="vidTitle" required placeholder="e.g. HGMU-30 Horn & Cab Sound Test">
+                            </div>
+                            <div class="form-group">
+                                <label>Video File URL or Embed Link *</label>
+                                <input type="text" id="vidUrl" required placeholder="Pictures & Videos/1.mp4 or YouTube URL">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Thumbnail Image URL</label>
+                                    <input type="text" id="vidThumb" placeholder="Pictures & Videos/1.png">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duration</label>
+                                    <input type="text" id="vidDuration" placeholder="e.g. 2:45">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Sort Order</label>
+                                <input type="number" id="vidOrder" value="0" placeholder="0">
+                            </div>
+                            <button type="submit" class="btn primary" style="width: 100%;">➕ Add Video</button>
+                        </form>
+                    </div>
+
+                    <!-- Grid: Existing Videos -->
+                    <div class="admin-table-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                            <h3>Showcase Videos (<span id="vidCountSpan">0</span>)</h3>
+                            <button class="btn secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="loadAdminVideos()">🔄 Refresh</button>
+                        </div>
+                        <div class="admin-media-grid" id="videoGridAdmin">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. CHANGE PASSWORD MODAL -->
+        <div id="passwordModal" class="admin-modal" style="display: none;">
+            <div class="admin-modal-card">
+                <h3>🔑 Change Admin Password</h3>
+                <p style="color: #a5b7d6; font-size: 0.9rem;">Set a new secure password for your Admin Portal account.</p>
+                <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currPass" required placeholder="Current password">
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPass" required placeholder="New password (min 6 characters)">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPass" required placeholder="Re-type new password">
+                    </div>
+                    <div id="passAlert" class="auth-alert" style="display: none;"></div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                        <button type="button" class="btn secondary" onclick="closePassModal()">Cancel</button>
+                        <button type="submit" class="btn primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Script -->
+    <script>
+        let currentAdmin = null;
+
+        // Check current session
+        async function checkSession() {
+            try {
+                const res = await fetch('/api/admin/me');
+                const data = await res.json();
+                if (data.loggedIn && data.user) {
+                    showDashboard(data.user);
+                } else {
+                    showLogin();
+                }
+            } catch (err) {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('btnChangePassword').style.display = 'none';
+            document.getElementById('btnLogout').style.display = 'none';
+        }
+
+        function showDashboard(user) {
+            currentAdmin = user;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            document.getElementById('btnChangePassword').style.display = 'inline-block';
+            document.getElementById('btnLogout').style.display = 'inline-block';
+
+            // Load data
+            loadStoreStats();
+            loadAdminOrders();
+            loadAdminProducts();
+            loadAdminDownloads();
+            loadAdminGallery();
+            loadAdminVideos();
+        }
+
+        // Handle Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('loginAlert');
+            const submitBtn = document.getElementById('loginBtn');
+            const user = document.getElementById('loginUsername').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+
+            alertBox.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying...';
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+                const data = await res.json();
+
+                if (data.success && data.user) {
+                    showDashboard(data.user);
+                } else {
+                    alertBox.textContent = data.error || 'Invalid credentials';
+                    alertBox.style.display = 'block';
+                }
+            } catch (err) {
+                alertBox.textContent = 'Connection error. Please try again.';
+                alertBox.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In to Dashboard';
+            }
+        }
+
+        // Handle Logout
+        document.getElementById('btnLogout').addEventListener('click', async () => {
+            await fetch('/api/admin/logout', { method: 'POST' });
+            currentAdmin = null;
+            showLogin();
+        });
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.remove('active'));
+
+            const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabName));
+            if (btn) btn.classList.add('active');
+
+            const pane = document.getElementById(`tab-${tabName}`);
+            if (pane) pane.classList.add('active');
+        }
+
+        // ──────────────────────────────────────────
+        // E-COMMERCE: STATS, ORDERS & PRODUCTS
+        // ──────────────────────────────────────────
+
+        async function loadStoreStats() {
+            try {
+                const res = await fetch('/api/admin/store-stats');
+                const data = await res.json();
+                if (data.success && data.stats) {
+                    document.getElementById('statRevenue').innerText = `Rs. ${data.stats.totalRevenue}`;
+                    document.getElementById('statPendingOrders').innerText = data.stats.pendingOrders;
+                    document.getElementById('statApprovedOrders').innerText = data.stats.approvedOrders;
+                    document.getElementById('statStoreProducts').innerText = data.stats.totalProducts;
+                }
+            } catch (e) {
+                console.error("Stats load error:", e);
+            }
+        }
+
+        async function loadAdminOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            try {
+                const res = await fetch('/api/admin/orders');
+                const data = await res.json();
+                if (data.success && data.orders) {
+                    if (!data.orders.length) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#94a3b8;">No customer orders placed yet.</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = data.orders.map(o => {
+                        const isPending = o.status === 'pending';
+                        const isApproved = o.status === 'approved';
+
+                        const statusBadge = isPending 
+                            ? `<span class="badge-status status-pending">Pending</span>` 
+                            : isApproved 
+                                ? `<span class="badge-status status-approved">Approved</span>`
+                                : `<span class="badge-status status-rejected">Rejected</span>`;
+
+                        const actions = isPending ? `
+                            <button class="btn-approve" onclick="approveOrderItem(${o.id})">Approve</button>
+                            <button class="btn-delete" onclick="rejectOrderItem(${o.id})">Reject</button>
+                        ` : isApproved ? `
+                            <span style="color:#34d399; font-size:0.8rem; font-weight:bold;">License Active</span>
+                        ` : `<span style="color:#f87171; font-size:0.8rem;">Rejected</span>`;
+
+                        return `
+                            <tr>
+                                <td>
+                                    <strong style="color:#38bdf8;">${escapeHtml(o.order_number)}</strong><br>
+                                    <span style="font-size:0.75rem; color:#8ba4cf;">${escapeHtml(o.created_at)}</span>
+                                </td>
+                                <td>
+                                    <strong>${escapeHtml(o.customer_name)}</strong><br>
+                                    <span style="font-size:0.75rem; color:#cbd5e1;">${escapeHtml(o.customer_email)}</span><br>
+                                    <a href="https://wa.me/${escapeHtml(o.customer_whatsapp.replace(/[^0-9]/g, ''))}" target="_blank" style="color:#4ade80; font-size:0.75rem; text-decoration:none;">
+                                        💬 ${escapeHtml(o.customer_whatsapp)}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span style="font-size:0.82rem;">${escapeHtml(o.items.join(', '))}</span>
+                                </td>
+                                <td>
+                                    <strong style="color:#4ade80;">Rs. ${o.total_amount}</strong><br>
+                                    <span style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(o.payment_method)}</span>
+                                </td>
+                                <td>
+                                    <span style="font-family:monospace; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px; font-size:0.82rem;">
+                                        ${escapeHtml(o.transaction_id || 'N/A')}
+                                    </span>
+                                </td>
+                                <td>${statusBadge}</td>
+                                <td>${actions}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error("Error loading orders:", err);
+            }
+        }
+
+        async function approveOrderItem(orderId) {
+            if (!confirm("Confirm payment received and approve order? This will generate official License Keys for the customer.")) return;
+            try {
+                const res = await fetch(`/api/admin/orders/${orderId}/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ admin_notes: "Approved by Admin" })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Order approved and license keys issued!");
+                    loadAdminOrders();
+                    loadStoreStats();
+                } else {
+                    alert(data.error || "Failed to approve order");
+                }
+            } catch (e) {
+                alert("Error approving order");
+            }
+        }
+
+        async function rejectOrderItem(orderId) {
+            const reason = prompt("Enter reason for rejection (optional):", "Invalid Transaction ID");
+            if (reason === null) return;
+            try {
+                const res = await fetch(`/api/admin/orders/${orderId}/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminOrders();
+                    loadStoreStats();
+                }
+            } catch (e) {
+                alert("Error rejecting order");
+            }
+        }
+
+        async function loadAdminProducts() {
+            const tbody = document.getElementById('productsTableBody');
+            const countSpan = document.getElementById('prodCountSpan');
+            try {
+                const res = await fetch('/api/products');
+                const data = await res.json();
+                if (data.success && data.products) {
+                    countSpan.innerText = data.products.length;
+                    tbody.innerHTML = data.products.map(p => `
+                        <tr>
+                            <td>
+                                <strong>${escapeHtml(p.title)}</strong><br>
+                                <span class="badge-cat" style="font-size:0.75rem;">${escapeHtml(p.category)}</span>
+                                <span style="font-size:0.75rem; color:#88a0ca; margin-left:4px;">${escapeHtml(p.version)}</span>
+                            </td>
+                            <td>
+                                <strong style="color:#38bdf8;">${p.is_free ? 'FREE' : 'Rs. ' + p.price}</strong>
+                                ${p.sale_price ? `<br><small style="color:#4ade80;">Sale: Rs. ${p.sale_price}</small>` : ''}
+                            </td>
+                            <td>
+                                <span class="count-pill">📥 ${p.download_count}</span>
+                            </td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteProductItem(${p.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error("Error loading products:", e);
+            }
+        }
+
+        async function handleAddProduct(e) {
+            e.preventDefault();
+            const body = {
+                title: document.getElementById('prodTitle').value.trim(),
+                category: document.getElementById('prodCategory').value,
+                badge: document.getElementById('prodBadge').value.trim(),
+                price: document.getElementById('prodPrice').value,
+                sale_price: document.getElementById('prodSalePrice').value || null,
+                version: document.getElementById('prodVersion').value.trim(),
+                file_size: document.getElementById('prodSize').value.trim(),
+                file_url: document.getElementById('prodFileUrl').value.trim(),
+                image_url: document.getElementById('prodImageUrl').value.trim() || 'Pictures & Videos/1.png',
+                kuid_info: document.getElementById('prodKuid').value.trim(),
+                description: document.getElementById('prodDesc').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/admin/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Product published to store successfully!');
+                    document.getElementById('addProductForm').reset();
+                    loadAdminProducts();
+                    loadStoreStats();
+                } else {
+                    alert(data.error || 'Failed to add product');
+                }
+            } catch (e) {
+                alert('Error publishing product');
+            }
+        }
+
+        async function deleteProductItem(id) {
+            if (!confirm('Are you sure you want to delete this product from the store?')) return;
+            try {
+                const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminProducts();
+                    loadStoreStats();
+                }
+            } catch (e) {
+                alert('Error deleting product');
+            }
+        }
+
+        // ──────────────────────────────────────────
+        // LEGACY DOWNLOADS, GALLERY & VIDEOS
+        // ──────────────────────────────────────────
+
+        async function loadAdminDownloads() {
+            try {
+                const res = await fetch('/api/downloads');
+                const data = await res.json();
+                const tbody = document.getElementById('downloadsTableBody');
+                const countSpan = document.getElementById('dlCountSpan');
+                const statDl = document.getElementById('statDownloads');
+                const statClicks = document.getElementById('statClicks');
+
+                if (data.success && data.downloads) {
+                    countSpan.textContent = data.downloads.length;
+                    statDl.textContent = data.downloads.length;
+                    
+                    let totalClicks = 0;
+                    tbody.innerHTML = data.downloads.map(item => {
+                        totalClicks += (item.download_count || 0);
+                        return `
+                            <tr>
+                                <td>
+                                    <strong>${escapeHtml(item.title)}</strong><br>
+                                    <span class="badge-cat" style="font-size:0.75rem;">${escapeHtml(item.category)}</span>
+                                    <span style="font-size:0.75rem; color:#88a0ca; margin-left: 4px;">${escapeHtml(item.version || '')}</span>
+                                </td>
+                                <td>${escapeHtml(item.file_size || '-')}</td>
+                                <td><span class="count-pill">📥 ${item.download_count}</span></td>
+                                <td>
+                                    <button class="btn-delete" onclick="deleteDownloadItem(${item.id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    statClicks.textContent = totalClicks;
+                }
+            } catch (err) {
+                console.error('Error loading downloads:', err);
+            }
+        }
+
+        async function handleAddDownload(e) {
+            e.preventDefault();
+            const body = {
+                title: document.getElementById('dlTitle').value.trim(),
+                category: document.getElementById('dlCategory').value,
+                file_size: document.getElementById('dlSize').value.trim(),
+                version: document.getElementById('dlVersion').value.trim(),
+                file_url: document.getElementById('dlUrl').value.trim(),
+                description: document.getElementById('dlDesc').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/admin/downloads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Download pack published successfully!');
+                    document.getElementById('addDownloadForm').reset();
+                    loadAdminDownloads();
+                } else {
+                    alert(data.error || 'Failed to add download');
+                }
+            } catch (err) {
+                alert('Server error adding download');
+            }
+        }
+
+        async function deleteDownloadItem(id) {
+            if (!confirm('Are you sure you want to delete this download pack?')) return;
+            try {
+                const res = await fetch(`/api/admin/downloads/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminDownloads();
+                } else {
+                    alert(data.error || 'Failed to delete');
+                }
+            } catch (err) {
+                alert('Server error deleting download');
+            }
+        }
+
+        async function loadAdminGallery() {
+            try {
+                const res = await fetch('/api/gallery');
+                const data = await res.json();
+                const grid = document.getElementById('galleryGridAdmin');
+                const countSpan = document.getElementById('galCountSpan');
+                const statGal = document.getElementById('statGallery');
+
+                if (data.success && data.gallery) {
+                    countSpan.textContent = data.gallery.length;
+                    if (statGal) statGal.textContent = data.gallery.length;
+
+                    grid.innerHTML = data.gallery.map(item => `
+                        <div class="admin-media-card">
+                            <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}" onerror="this.src='Pictures & Videos/1.png'">
+                            <div class="admin-media-body">
+                                <div class="media-title">${escapeHtml(item.title)}</div>
+                                <span class="badge-cat" style="font-size:0.7rem;">${escapeHtml(item.category)}</span>
+                                <button class="btn-delete" style="margin-top:6px; width:100%;" onclick="deleteGalleryItem(${item.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error loading gallery:', err);
+            }
+        }
+
+        async function handleAddImage(e) {
+            e.preventDefault();
+            const body = {
+                title: document.getElementById('imgTitle').value.trim(),
+                image_url: document.getElementById('imgUrl').value.trim(),
+                category: document.getElementById('imgCategory').value.trim() || 'General',
+                sort_order: parseInt(document.getElementById('imgOrder').value, 10) || 0
+            };
+
+            try {
+                const res = await fetch('/api/admin/gallery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Image added to gallery!');
+                    document.getElementById('addImageForm').reset();
+                    loadAdminGallery();
+                } else {
+                    alert(data.error || 'Failed to add image');
+                }
+            } catch (err) {
+                alert('Server error adding image');
+            }
+        }
+
+        async function deleteGalleryItem(id) {
+            if (!confirm('Are you sure you want to delete this image?')) return;
+            try {
+                const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminGallery();
+                } else {
+                    alert(data.error || 'Failed to delete');
+                }
+            } catch (err) {
+                alert('Server error deleting image');
+            }
+        }
+
+        async function loadAdminVideos() {
+            try {
+                const res = await fetch('/api/videos');
+                const data = await res.json();
+                const grid = document.getElementById('videoGridAdmin');
+                const countSpan = document.getElementById('vidCountSpan');
+                const statVid = document.getElementById('statVideos');
+
+                if (data.success && data.videos) {
+                    countSpan.textContent = data.videos.length;
+                    if (statVid) statVid.textContent = data.videos.length;
+
+                    grid.innerHTML = data.videos.map(item => `
+                        <div class="admin-media-card">
+                            <div style="background:#091428; height:100px; display:flex; align-items:center; justify-content:center; border-radius:8px; position:relative;">
+                                🎬
+                                <span style="position:absolute; bottom:5px; right:5px; font-size:0.7rem; background:rgba(0,0,0,0.6); padding:2px 5px; border-radius:4px;">${escapeHtml(item.duration || 'Video')}</span>
+                            </div>
+                            <div class="admin-media-body">
+                                <div class="media-title">${escapeHtml(item.title)}</div>
+                                <div style="font-size:0.75rem; color:#8ba4cf; word-break:break-all;">${escapeHtml(item.video_url)}</div>
+                                <button class="btn-delete" style="margin-top:6px; width:100%;" onclick="deleteVideoItem(${item.id})">Delete Video</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Error loading videos:', err);
+            }
+        }
+
+        async function handleAddVideo(e) {
+            e.preventDefault();
+            const body = {
+                title: document.getElementById('vidTitle').value.trim(),
+                video_url: document.getElementById('vidUrl').value.trim(),
+                thumbnail_url: document.getElementById('vidThumb').value.trim() || 'Pictures & Videos/video-thumbnail.svg',
+                duration: document.getElementById('vidDuration').value.trim(),
+                sort_order: parseInt(document.getElementById('vidOrder').value, 10) || 0
+            };
+
+            try {
+                const res = await fetch('/api/admin/videos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Video added successfully!');
+                    document.getElementById('addVideoForm').reset();
+                    loadAdminVideos();
+                } else {
+                    alert(data.error || 'Failed to add video');
+                }
+            } catch (err) {
+                alert('Server error adding video');
+            }
+        }
+
+        async function deleteVideoItem(id) {
+            if (!confirm('Are you sure you want to delete this video?')) return;
+            try {
+                const res = await fetch(`/api/admin/videos/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminVideos();
+                } else {
+                    alert(data.error || 'Failed to delete');
+                }
+            } catch (err) {
+                alert('Server error deleting video');
+            }
+        }
+
+        // Change Password Modal
+        document.getElementById('btnChangePassword').addEventListener('click', () => {
+            document.getElementById('passwordModal').style.display = 'flex';
+        });
+
+        function closePassModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('passAlert').style.display = 'none';
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const curr = document.getElementById('currPass').value;
+            const next = document.getElementById('newPass').value;
+            const conf = document.getElementById('confirmPass').value;
+            const alertBox = document.getElementById('passAlert');
+
+            if (next !== conf) {
+                alertBox.textContent = 'New passwords do not match';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword: curr, newPassword: next })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Password changed successfully!');
+                    closePassModal();
+                } else {
+                    alertBox.textContent = data.error || 'Failed to change password';
+                    alertBox.style.display = 'block';
+                }
+            } catch (err) {
+                alertBox.textContent = 'Error contacting server';
+                alertBox.style.display = 'block';
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+</html>

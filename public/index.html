@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pak Trainz Developers | Official Pakistan Railways Simulation</title>
+    <link rel="icon" type="image/x-icon" href="Pictures & Videos/Pak-Trainz.jpg">
+    <link rel="stylesheet" href="Pak-Trainz.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="#home">
+            <img src="Pictures & Videos/Pak-Trainz.jpg" alt="Pak Trainz logo">
+            <span>Pak Trainz DEVELOPERS</span>
+        </a>
+        <nav class="nav-links">
+            <a href="#home">Home</a>
+            <a href="store.html" style="background: rgba(37, 99, 235, 0.4); color: #fff; font-weight: bold;">🛒 Store</a>
+            <a href="gallery.html">Gallery</a>
+            <a href="videos.html">Videos</a>
+            <a href="#downloads">Downloads</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <a href="admin.html" class="nav-admin-link">⚙️ Admin</a>
+        </nav>
+    </header>
+
+    <main class="page">
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">Trainz RailRoad Simulator Contents for Pakistan Railways</p>
+                <h1>We are here to create Trainz Railroad Simulator Locomotives, Rolling stock & Original Routes of Pakistan Railways.</h1>
+                <p>3 Friends started this project for Pakistan Railways simulator game playing in Most played international game Trainz Railroad Simulator 2019 by great "Auran". Feel realistic as you explore the beautiful landscapes of Pakistan Railways through the eyes of a train driver. <span class="hero-names">Asif Hussain, Usman Mani & Waqas Rasool</span> brings for you realistic rail operation in Pakistan Railways by using Pakistan Locomotives, Rolling stocks and routes.</p>
+                <div class="actions">
+                    <a class="btn primary" href="store.html" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: bold;">🛒 Visit Addon Store</a>
+                    <a class="btn primary" href="https://www.auran.com" target="_blank" rel="noopener noreferrer">Visit Trainz Simulator by Auran</a>
+                    <a class="btn secondary" href="gallery.html">Explore Media</a>
+
+                    <a class="btn secondary"
+                       href="https://youtube.com/@trainzcontentsdeveloper?si=_u6V5TV9xvOahG_n"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       style="display:inline-flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="#FF0000" d="M23.5 7.2a3 3 0 0 0-2.1-2.1C19.6 4.5 12 4.5 12 4.5s-7.6 0-9.4.6A3 3 0 0 0 .5 7.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-4.8z"/>
+                            <path fill="#fff" d="M9.8 15.5V8.5L16 12l-6.2 3.5z"/>
+                        </svg>
+                        YouTube Channel
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="hero-card" id="heroSlideshow">
+                    <img class="hero-slide active" src="Pictures & Videos/1.png" alt="Trainz photo 1">
+                    <img class="hero-slide" src="Pictures & Videos/2.JPEG" alt="Trainz photo 2">
+                    <img class="hero-slide" src="Pictures & Videos/3.png" alt="Trainz photo 3">
+                    <img class="hero-slide" src="Pictures & Videos/4.png" alt="Trainz photo 4">
+                    <img class="hero-slide" src="Pictures & Videos/5.png" alt="Trainz photo 5">
+                    <img class="hero-slide" src="Pictures & Videos/6.png" alt="Trainz photo 6">
+                    <div class="hero-slide-dots" aria-label="Hero slideshow controls">
+                        <button class="hero-slide-dot active" type="button" data-index="0" aria-label="Show slide 1"></button>
+                        <button class="hero-slide-dot" type="button" data-index="1" aria-label="Show slide 2"></button>
+                        <button class="hero-slide-dot" type="button" data-index="2" aria-label="Show slide 3"></button>
+                        <button class="hero-slide-dot" type="button" data-index="3" aria-label="Show slide 4"></button>
+                        <button class="hero-slide-dot" type="button" data-index="4" aria-label="Show slide 5"></button>
+                        <button class="hero-slide-dot" type="button" data-index="5" aria-label="Show slide 6"></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Showcase Section -->
+        <section class="content-block" id="pictures">
+            <div class="section-heading">
+                <p class="eyebrow">Gallery</p>
+                <h2>Picture showcase</h2>
+                <p>Highlighting our best locomotive, route, and landscape simulation shots.</p>
+            </div>
+
+            <div class="gallery" id="homeGalleryGrid">
+                <!-- Populated dynamically from /api/gallery with fallback -->
+                <figure class="gallery-item"><img src="Pictures & Videos/1.png" alt="Trainz photo 1"></figure>
+                <figure class="gallery-item"><img src="Pictures & Videos/2.JPEG" alt="Trainz photo 2"></figure>
+                <figure class="gallery-item"><img src="Pictures & Videos/3.png" alt="Trainz photo 3"></figure>
+                <figure class="gallery-item"><img src="Pictures & Videos/4.png" alt="Trainz photo 4"></figure>
+                <figure class="gallery-item"><img src="Pictures & Videos/5.png" alt="Trainz photo 5"></figure>
+                <figure class="gallery-item"><img src="Pictures & Videos/6.png" alt="Trainz photo 6"></figure>
+            </div>
+            <div style="text-align: center; margin-top: 24px;">
+                <a class="btn secondary" href="gallery.html">View All Gallery Photos →</a>
+            </div>
+        </section>
+
+        <!-- Video Gallery Section -->
+        <section class="content-block" id="videos">
+            <div class="section-heading">
+                <p class="eyebrow">Videos</p>
+                <h2>Video gallery</h2>
+                <p>Experience Pakistan Railways gameplay clips and locomotive sound tests.</p>
+            </div>
+
+            <div class="gallery video-gallery" id="homeVideoGrid">
+                <!-- High quality cards with actual Pakistan Railways locomotive thumbnails -->
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/1.mp4" data-video-title="Trainz Rail Simulator Video 1" tabindex="0" role="button" aria-label="Play video 1">
+                    <div class="video-thumb">
+                        <img src="Pictures%20%26%20Videos/1.png" alt="Video 1" class="video-thumb-img">
+                    </div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 1</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/2.mp4" data-video-title="Trainz Rail Simulator Video 2" tabindex="0" role="button" aria-label="Play video 2">
+                    <div class="video-thumb">
+                        <img src="Pictures%20%26%20Videos/2.JPEG" alt="Video 2" class="video-thumb-img">
+                    </div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 2</span>
+                    </div>
+                </figure>
+                <figure class="gallery-item video-item" data-video-src="Pictures & Videos/3.mp4" data-video-title="Trainz Rail Simulator Video 3" tabindex="0" role="button" aria-label="Play video 3">
+                    <div class="video-thumb">
+                        <img src="Pictures%20%26%20Videos/3.png" alt="Video 3" class="video-thumb-img">
+                    </div>
+                    <div class="video-card-overlay">
+                        <span class="video-play-btn" aria-hidden="true"></span>
+                        <span class="video-card-label">Video 3</span>
+                    </div>
+                </figure>
+            </div>
+            <div style="text-align: center; margin-top: 24px;">
+                <a class="btn secondary" href="videos.html">Watch All Videos →</a>
+            </div>
+        </section>
+
+        <div id="videoLightbox" class="lightbox" aria-hidden="true">
+            <button class="lightbox-close" aria-label="Close video preview">×</button>
+            <div id="videoContainer" style="width: min(100%, 960px); max-height: 90vh;">
+                <video id="videoLightboxPlayer" controls autoplay playsinline poster="Pictures & Videos/video-thumbnail.svg" style="width: 100%; height: auto; border-radius: 14px;">
+                    <source src="" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
+        <!-- Downloads Section -->
+        <section class="content-block" id="downloads">
+            <div class="section-heading">
+                <p class="eyebrow">Downloads</p>
+                <h2>Download Center</h2>
+                <p>Authentic Pakistan Railways Locomotive packs (.cdp), rolling stocks, dependencies & route assets.</p>
+            </div>
+
+            <!-- Dynamic Downloads Container -->
+            <div id="dynamicDownloads" class="download-list">
+                <!-- Populated dynamically via JS with live counts -->
+                <div style="text-align:center; padding: 30px; color: #a5b7d6;">
+                    Loading authentic Pakistan Railways add-on packs...
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section" id="about">
+            <div class="about-content">
+                <p class="eyebrow">About</p>
+                <h2>Passion to make Pakistan Railways in Trainz</h2>
+                <p>We are passionate about creating the best possible simulation experience for our community.</p>
+                <ul>
+                    <li>Over Perfection is our motto</li>
+                    <li>We strive for excellence in every detail according to original Pakistan Railways standards</li>
+                    <li>We are committed to delivering high-quality 3D content, realistic engine physics, and authentic horn sounds</li>
+                </ul>
+            </div>
+
+            <aside class="about-card">
+                <h3>Pak Trainz Community Hub</h3>
+                <p>Subscribe to our official YouTube channel for future updates, tutorial guides, and sneak peeks!</p>
+                <a class="btn primary" href="https://youtube.com/@trainzcontentsdeveloper" target="_blank" rel="noopener noreferrer">YouTube Channel</a>
+            </aside>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section" id="contact">
+            <h2>Pakistan Railways Addon Development</h2>
+            <p>For custom requests, feedback or bug reports, feel free to reach out:</p>
+            <p><a href="mailto:railsimdeveloperspak@gmail.com" style="color: #64b5f6; font-weight: bold; text-decoration: none;">railsimdeveloperspak@gmail.com</a></p>
+            <div style="margin-top: 15px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a class="btn secondary" href="mailto:railsimdeveloperspak@gmail.com">Contact Us</a>
+                <a class="btn secondary" href="admin.html">⚙️ Admin Portal</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Client Script for Dynamic Content & Downloads Counter -->
+    <script>
+        // 1. Hero Slideshow
+        const heroSlides = Array.from(document.querySelectorAll('.hero-slide'));
+        const heroDots = Array.from(document.querySelectorAll('.hero-slide-dot'));
+        let heroSlideIndex = 0;
+        let heroInterval = null;
+
+        function showHeroSlide(index) {
+            heroSlides.forEach(s => s.classList.remove('active'));
+            heroDots.forEach(d => d.classList.remove('active'));
+            heroSlideIndex = (index + heroSlides.length) % heroSlides.length;
+            if (heroSlides[heroSlideIndex]) heroSlides[heroSlideIndex].classList.add('active');
+            if (heroDots[heroSlideIndex]) heroDots[heroSlideIndex].classList.add('active');
+        }
+
+        function startHeroAutoplay() {
+            if (heroInterval) clearInterval(heroInterval);
+            heroInterval = setInterval(() => {
+                showHeroSlide(heroSlideIndex + 1);
+            }, 4500);
+        }
+
+        heroDots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => {
+                showHeroSlide(idx);
+                startHeroAutoplay();
+            });
+        });
+        startHeroAutoplay();
+
+        // 2. Fetch and Render Dynamic Downloads
+        async function loadDownloads() {
+            const container = document.getElementById('dynamicDownloads');
+            try {
+                const res = await fetch('/api/downloads');
+                const data = await res.json();
+                if (!data.success || !data.downloads || data.downloads.length === 0) {
+                    renderFallbackDownloads(container);
+                    return;
+                }
+
+                // Group by Category
+                const groups = {};
+                data.downloads.forEach(item => {
+                    const cat = item.category || 'General';
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(item);
+                });
+
+                let html = '';
+                for (const [category, items] of Object.entries(groups)) {
+                    html += `
+                        <div class="download-group-block">
+                            <h3 class="download-category-header">🚂 ${escapeHtml(category)}</h3>
+                            <div class="download-items-grid">
+                                ${items.map(item => `
+                                    <div class="download-card" id="dl-card-${item.id}">
+                                        <div class="download-card-body">
+                                            <div class="download-card-top">
+                                                <span class="badge-cat">${escapeHtml(item.category)}</span>
+                                                <span class="badge-version">${escapeHtml(item.version || 'TRS19 / TRS22')}</span>
+                                            </div>
+                                            <h4 class="download-card-title">${escapeHtml(item.title)}</h4>
+                                            ${item.description ? `<p class="download-card-desc">${escapeHtml(item.description)}</p>` : ''}
+                                            
+                                            <div class="download-card-footer">
+                                                <div class="download-meta-info">
+                                                    ${item.file_size ? `<span class="size-pill">💾 ${escapeHtml(item.file_size)}</span>` : ''}
+                                                    <span class="count-pill" id="counter-${item.id}">📥 ${item.download_count} downloads</span>
+                                                </div>
+                                                <a class="btn-download" href="${encodeURI(item.file_url)}" download="${escapeHtml(item.title)}" onclick="trackDownload(${item.id})">
+                                                    Download CDP
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch (err) {
+                console.warn('API error, using fallback:', err);
+                renderFallbackDownloads(container);
+            }
+        }
+
+        // Live download counter tracker
+        async function trackDownload(id) {
+            try {
+                const res = await fetch(`/api/download/${id}/click`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success && typeof data.count === 'number') {
+                    const counterEl = document.getElementById(`counter-${id}`);
+                    if (counterEl) {
+                        counterEl.textContent = `📥 ${data.count} downloads`;
+                        counterEl.classList.add('pulse-update');
+                        setTimeout(() => counterEl.classList.remove('pulse-update'), 600);
+                    }
+                }
+            } catch (e) {
+                console.log('Download track clicked:', id);
+            }
+        }
+
+        function renderFallbackDownloads(container) {
+            container.innerHTML = `
+                <div class="download-group">
+                    <span class="download-title">Locomotives</span>
+                    <div class="download-sublist">
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/ALU%2024.cdp" download onclick="trackDownload(1)"><span class="download-title">ALU 24.cdp</span><span class="download-meta">16.6 MB • CDP</span></a>
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/ALU%2024%20dependencies.cdp" download onclick="trackDownload(2)"><span class="download-title">ALU 24 dependencies.cdp</span><span class="download-meta">63.8 MB • CDP</span></a>
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/HGMU%2030%20-%20R%20(8213).cdp" download onclick="trackDownload(3)"><span class="download-title">HGMU 30 - R (8213).cdp</span><span class="download-meta">200.5 MB • CDP</span></a>
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/HGMU-30%20dependancies.cdp" download onclick="trackDownload(4)"><span class="download-title">HGMU-30 dependancies.cdp</span><span class="download-meta">225.5 MB • CDP</span></a>
+                    </div>
+                </div>
+                <div class="download-group" style="margin-top:15px;">
+                    <span class="download-title">Routes</span>
+                    <div class="download-sublist">
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/Pakistan%20Railways.cdp" download onclick="trackDownload(5)"><span class="download-title">Pakistan Railways.cdp</span><span class="download-meta">2.2 MB • CDP</span></a>
+                    </div>
+                </div>
+                <div class="download-group" style="margin-top:15px;">
+                    <span class="download-title">Rolling Stock</span>
+                    <div class="download-sublist">
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/AC-STANDARD%208032-5.cdp" download onclick="trackDownload(6)"><span class="download-title">AC-STANDARD 8032-5.cdp</span><span class="download-meta">27.8 MB • CDP</span></a>
+                        <a class="download-item download-file" href="Pictures%20%26%20Videos/Power%20Van.cdp" download onclick="trackDownload(7)"><span class="download-title">Power Van.cdp</span><span class="download-meta">120.6 MB • CDP</span></a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // 3. Video Lightbox Handler
+        const videoLightbox = document.getElementById('videoLightbox');
+        const videoContainer = document.getElementById('videoContainer');
+        const videoCloseButton = videoLightbox.querySelector('.lightbox-close');
+
+        function openVideoModal(source, title) {
+            if (!source) return;
+            videoContainer.innerHTML = '';
+
+            // 1. Check if YouTube link
+            if (source.includes('youtube.com') || source.includes('youtu.be')) {
+                let embedUrl = source;
+                if (source.includes('watch?v=')) {
+                    const vId = source.split('watch?v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${vId}?autoplay=1`;
+                } else if (source.includes('youtu.be/')) {
+                    const vId = source.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${vId}?autoplay=1`;
+                }
+                videoContainer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="520" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:14px; border:none;"></iframe>`;
+                videoLightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                return;
+            }
+
+            // 2. Check if Google Drive preview link
+            if (source.includes('drive.google.com')) {
+                let driveUrl = source;
+                if (source.includes('/view')) driveUrl = source.replace('/view', '/preview');
+                videoContainer.innerHTML = `<iframe src="${driveUrl}" width="100%" height="520" frameborder="0" allow="autoplay" allowfullscreen style="border-radius:14px; border:none;"></iframe>`;
+                videoLightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                return;
+            }
+
+            // 3. HTML5 Video Player with error fallback for cloud hosts
+            const videoEl = document.createElement('video');
+            videoEl.id = 'videoLightboxPlayer';
+            videoEl.controls = true;
+            videoEl.autoplay = true;
+            videoEl.playsInline = true;
+            videoEl.style.width = '100%';
+            videoEl.style.maxHeight = '80vh';
+            videoEl.style.borderRadius = '14px';
+            videoEl.style.background = '#000';
+            videoEl.src = source;
+
+            videoEl.addEventListener('error', () => {
+                videoContainer.innerHTML = `
+                    <div class="video-offline-card">
+                        <div style="font-size: 3.2rem; margin-bottom: 8px;">🚂</div>
+                        <h3 style="margin: 0 0 10px; color: #fff; font-size: 1.35rem;">${escapeHtml(title || 'Pakistan Railways Simulation Video')}</h3>
+                        <p style="color: #cbd5e1; margin: 0 auto 22px; font-size: 0.95rem; line-height: 1.55;">
+                            Due to cloud hosting 100MB file limits, this 1080p full gameplay video is hosted on our official YouTube channel. You can watch it in full HD right now:
+                        </p>
+                        <a href="https://youtube.com/@trainzcontentsdeveloper?si=_u6V5TV9xvOahG_n" target="_blank" rel="noopener noreferrer" class="btn primary" style="display:inline-flex; align-items:center; gap:8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.5 7.2a3 3 0 0 0-2.1-2.1C19.6 4.5 12 4.5 12 4.5s-7.6 0-9.4.6A3 3 0 0 0 .5 7.2 31.7 31.7 0 0 0 0 12a31.7 31.7 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.7 31.7 0 0 0 24 12a31.7 31.7 0 0 0-.5-4.8z"/><path fill="#fff" d="M9.8 15.5V8.5L16 12l-6.2 3.5z"/></svg>
+                            Watch on Official YouTube Channel
+                        </a>
+                    </div>
+                `;
+            });
+
+            videoContainer.appendChild(videoEl);
+            videoLightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoModal() {
+            videoLightbox.classList.remove('active');
+            videoContainer.innerHTML = '';
+            document.body.style.overflow = '';
+        }
+
+        if (videoCloseButton) videoCloseButton.addEventListener('click', closeVideoModal);
+        if (videoLightbox) {
+            videoLightbox.addEventListener('click', (e) => {
+                if (e.target === videoLightbox) closeVideoModal();
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeVideoModal();
+        });
+
+        // Attach listeners to video items
+        document.querySelectorAll('.video-item').forEach(item => {
+            item.addEventListener('click', () => openVideoModal(item.dataset.videoSrc, item.dataset.videoTitle));
+        });
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDownloads();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRS DEP PAK Store | Premium Pakistan Railways Addons for Trainz</title>
+    <link rel="icon" type="image/x-icon" href="Pictures & Videos/Pak-Trainz.jpg">
+    <link rel="stylesheet" href="Pak-Trainz.css">
+    <style>
+        /* Store Specific Styles */
+        .store-hero {
+            text-align: center;
+            padding: 40px 20px 25px;
+            background: rgba(13, 27, 62, 0.75);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 30px;
+            backdrop-filter: blur(14px);
+        }
+
+        .store-hero h1 {
+            font-size: 2.2rem;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #ffffff, #90caf9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .store-hero p {
+            color: #b0c4de;
+            max-width: 780px;
+            margin: 0 auto;
+            font-size: 1.05rem;
+        }
+
+        /* Filter Controls */
+        .store-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding: 16px 20px;
+            background: rgba(8, 18, 41, 0.65);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .category-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #d1d5db;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cat-btn:hover, .cat-btn.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: rgba(11, 23, 51, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(37, 99, 235, 0.25);
+        }
+
+        .prod-media {
+            position: relative;
+            height: 200px;
+            background: #060d1f;
+            overflow: hidden;
+        }
+
+        .prod-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .prod-media img {
+            transform: scale(1.05);
+        }
+
+        .prod-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .badge-hot { background: #ef4444; color: #fff; }
+        .badge-new { background: #10b981; color: #fff; }
+        .badge-popular { background: #f59e0b; color: #111; }
+        .badge-free { background: #06b6d4; color: #fff; }
+
+        .prod-cat-tag {
+            position: absolute;
+            bottom: 10px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #93c5fd;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .prod-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .prod-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 8px 0;
+            line-height: 1.35;
+        }
+
+        .prod-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .prod-desc {
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .prod-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 14px;
+            margin-top: auto;
+        }
+
+        .prod-price {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-current {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+
+        .price-current.free {
+            color: #4ade80;
+        }
+
+        .price-old {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-decoration: line-through;
+        }
+
+        .btn-add-cart {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-add-cart:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transform: scale(1.02);
+        }
+
+        .btn-get-free {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #fff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-get-free:hover {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Cart Floating Button in Nav */
+        .cart-nav-btn {
+            background: rgba(37, 99, 235, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            color: #fff;
+            padding: 7px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .cart-nav-btn:hover {
+            background: #2563eb;
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+        }
+
+        .cart-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 2px 7px;
+            border-radius: 999px;
+        }
+
+        /* Cart Slide-out Drawer */
+        .cart-drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .cart-drawer-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background: #091224;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -10px 0 35px rgba(0, 0, 0, 0.7);
+        }
+
+        .cart-drawer.open {
+            right: 0;
+        }
+
+        .cart-drawer-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .cart-drawer-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        .btn-close-drawer {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .btn-close-drawer:hover { color: #fff; }
+
+        .cart-drawer-body {
+            padding: 20px 24px;
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 14px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            align-items: center;
+        }
+
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-info {
+            flex-grow: 1;
+        }
+
+        .cart-item-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 0.88rem;
+            color: #38bdf8;
+            font-weight: 700;
+        }
+
+        .cart-item-remove {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 6px;
+        }
+
+        .cart-drawer-footer {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .cart-subtotal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .cart-subtotal span:last-child {
+            color: #38bdf8;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-checkout:hover {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #0b1528;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 20px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .modal-card h2 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+        }
+
+        .payment-box {
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 14px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .payment-box h4 {
+            margin: 0 0 8px 0;
+            color: #60a5fa;
+            font-size: 1rem;
+        }
+
+        .pay-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .pay-detail-row strong {
+            color: #38bdf8;
+        }
+
+        .order-status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #f59e0b; color: #111; }
+        .status-approved { background: #10b981; color: #fff; }
+
+        .license-box {
+            background: #040914;
+            border: 1px dashed #38bdf8;
+            border-radius: 12px;
+            padding: 14px;
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .license-key-text {
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #4ade80;
+            letter-spacing: 0.1em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar Navigation -->
+    <header class="topbar">
+        <a class="brand" href="/">
+            <img src="Pictures & Videos/Pak-Trainz.jpg" alt="Pak Trainz logo">
+            <span>Pak Trainz DEVELOPERS</span>
+        </a>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/store.html" style="background: rgba(37, 99, 235, 0.4); color: #fff; font-weight: bold;">🛒 Store</a>
+            <a href="/gallery.html">Gallery</a>
+            <a href="/videos.html">Videos</a>
+            <a href="/#downloads">Downloads</a>
+            <a href="/#about">About</a>
+            <a href="/#contact">Contact</a>
+            <a href="/admin.html">⚙️ Admin</a>
+            <button class="cart-nav-btn" onclick="toggleCartDrawer()">
+                🛒 Cart <span class="cart-badge" id="navCartBadge">0</span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="page">
+        <!-- Store Hero Banner -->
+        <section class="store-hero">
+            <p class="eyebrow" style="color: #60a5fa; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase;">
+                Official Digital Depot • Pakistan Railways
+            </p>
+            <h1>Pakistan Railways Trainz Addons Store</h1>
+            <p>
+                Get authentic, high-detail Pakistan Railways Locomotives (HGMU-30, ALU-24), Air-conditioned Coaches, Power Vans, and Mainline Routes designed for Trainz Railroad Simulator (TRS19 &amp; TRS22).
+            </p>
+        </section>
+
+        <!-- Filter & Search Controls -->
+        <section class="store-controls">
+            <div class="category-pills" id="categoryFilter">
+                <button class="cat-btn active" onclick="filterCategory('All')">All Addons</button>
+                <button class="cat-btn" onclick="filterCategory('Locomotives')">🚂 Locomotives</button>
+                <button class="cat-btn" onclick="filterCategory('Rolling Stock')">🚃 Rolling Stock</button>
+                <button class="cat-btn" onclick="filterCategory('Routes')">🛤️ Routes &amp; Scenery</button>
+                <button class="cat-btn" onclick="filterCategory('Dependencies')">🔊 Dependencies</button>
+                <button class="cat-btn" onclick="filterFreeOnly()">🎁 Free Downloads</button>
+            </div>
+            <div>
+                <input type="text" id="storeSearch" placeholder="🔍 Search locomotives, coaches..." 
+                       oninput="handleSearch(this.value)" 
+                       style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color:#fff; padding: 8px 16px; border-radius: 999px; outline: none;">
+            </div>
+        </section>
+
+        <!-- Products Listing Grid -->
+        <section class="products-grid" id="productsGrid">
+            <!-- Dynamically populated via JS -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #94a3b8;">
+                Loading Pakistan Railways Addons...
+            </div>
+        </section>
+
+        <!-- Client App Integration Banner (Phase 3 Link) -->
+        <section class="content-block" style="display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; border: 1px solid rgba(59, 130, 246, 0.3);">
+            <div>
+                <span style="background: rgba(37,99,235,0.2); color:#60a5fa; padding:4px 10px; border-radius:6px; font-weight:700; font-size:0.8rem;">
+                    WINDOWS DESKTOP INSTALLER
+                </span>
+                <h3 style="margin: 8px 0; color:#fff; font-size:1.3rem;">TRS DEP PAK Client App &amp; Launcher</h3>
+                <p style="margin:0; color:#94a3b8; font-size:0.92rem;">
+                    Download our 1-click Windows client to automatically install your purchased .cdp files directly into Trainz Content Manager using your License Key.
+                </p>
+            </div>
+            <div>
+                <button class="btn primary" onclick="showClientAppInfo()" style="padding:10px 22px;">
+                    🖥️ Client App Info
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Slide-out Shopping Cart Drawer -->
+    <div class="cart-drawer-backdrop" id="cartBackdrop" onclick="toggleCartDrawer()"></div>
+    <aside class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h2>🛒 Your Depot Cart</h2>
+            <button class="btn-close-drawer" onclick="toggleCartDrawer()">×</button>
+        </div>
+        <div class="cart-drawer-body" id="cartItemList">
+            <!-- Dynamically populated -->
+        </div>
+        <div class="cart-drawer-footer">
+            <div class="cart-subtotal">
+                <span>Subtotal:</span>
+                <span id="cartSubtotalAmount">Rs. 0</span>
+            </div>
+            <button class="btn-checkout" id="btnCheckout" onclick="openCheckoutModal()">
+                Proceed to Checkout →
+            </button>
+        </div>
+    </aside>
+
+    <!-- Checkout Modal -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Checkout &amp; Payment</h2>
+                <button class="btn-close-drawer" onclick="closeCheckoutModal()">×</button>
+            </div>
+
+            <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="color:#e2e8f0; font-size:0.88rem; font-weight:600; display:block; margin-bottom:4px;">Full Name *</label>
+                    <input type="text" id="custName" required placeholder="e.g. Asad Khan" style="width:100%; padding:10px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="color:#e2e8f0; font-size:0.88rem; font-weight:600; display:block; margin-bottom:4px;">Email Address (For License &amp; Downloads) *</label>
+                    <input type="email" id="custEmail" required placeholder="name@example.com" style="width:100%; padding:10px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="color:#e2e8f0; font-size:0.88rem; font-weight:600; display:block; margin-bottom:4px;">WhatsApp Number (For Instant Activation) *</label>
+                    <input type="tel" id="custWhatsapp" required placeholder="03001234567" style="width:100%; padding:10px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                </div>
+
+                <!-- Payment Method Selector -->
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="color:#e2e8f0; font-size:0.88rem; font-weight:600; display:block; margin-bottom:4px;">Select Payment Method *</label>
+                    <select id="paymentMethod" onchange="updatePaymentInstructions()" style="width:100%; padding:10px; border-radius:8px; background:#0d1c3b; border:1px solid rgba(255,255,255,0.2); color:#fff;">
+                        <option value="EasyPaisa">EasyPaisa Mobile Account</option>
+                        <option value="JazzCash">JazzCash Mobile Account</option>
+                        <option value="SadaPay">SadaPay / NayaPay</option>
+                        <option value="Bank Transfer">Bank Transfer / Raast (Meezan / Alfalah)</option>
+                    </select>
+                </div>
+
+                <!-- Dynamic Payment Instructions Box -->
+                <div class="payment-box" id="paymentInstructionsBox">
+                    <h4>💳 Payment Account Details</h4>
+                    <div class="pay-detail-row">
+                        <span>Account Title:</span>
+                        <strong id="payAccountTitle">Waqas Rasool / TRS DEP PAK</strong>
+                    </div>
+                    <div class="pay-detail-row">
+                        <span>Account Number:</span>
+                        <strong id="payAccountNumber">0300-1234567</strong>
+                    </div>
+                    <div class="pay-detail-row">
+                        <span>Total Payable:</span>
+                        <strong id="payTotalAmount" style="color:#4ade80; font-size:1.1rem;">Rs. 0</strong>
+                    </div>
+                    <p style="font-size:0.82rem; color:#94a3b8; margin:8px 0 0 0;">
+                        1. Apne mobile app se oper diye gaye account par exact amount send karein.<br>
+                        2. Send karne ke baad Transaction ID (TID) neechay enter karein.
+                    </p>
+                </div>
+
+                <div class="form-group" style="margin-bottom:18px;" id="tidFormGroup">
+                    <label style="color:#e2e8f0; font-size:0.88rem; font-weight:600; display:block; margin-bottom:4px;">Transaction ID (TID) / Reference No *</label>
+                    <input type="text" id="custTid" placeholder="e.g. 28938172938 (from SMS / App)" style="width:100%; padding:10px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                </div>
+
+                <div id="checkoutAlert" style="display:none; padding:10px; border-radius:8px; margin-bottom:14px; font-size:0.88rem;"></div>
+
+                <button type="submit" id="btnSubmitOrder" class="btn primary" style="width:100%; padding:12px; font-size:1rem; font-weight:bold;">
+                    ✅ Confirm Order &amp; Submit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Status / Success Modal -->
+    <div class="modal-overlay" id="orderStatusModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="color:#38bdf8;">🎉 Order Status</h2>
+                <button class="btn-close-drawer" onclick="closeOrderStatusModal()">×</button>
+            </div>
+
+            <div id="orderStatusContent" style="padding:10px 0;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Store Client JavaScript -->
+    <script>
+        let allProducts = [];
+        let currentCategory = 'All';
+        let cart = [];
+
+        // Load Cart from localStorage
+        function loadCartFromStorage() {
+            try {
+                const saved = localStorage.getItem('trs_cart');
+                if (saved) cart = JSON.parse(saved);
+            } catch (e) { cart = []; }
+            updateCartUI();
+        }
+
+        function saveCartToStorage() {
+            localStorage.setItem('trs_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        // Fetch Products from API
+        async function fetchProducts() {
+            const grid = document.getElementById('productsGrid');
+            try {
+                const res = await fetch('/api/products');
+                const data = await res.json();
+                if (data.success && data.products) {
+                    allProducts = data.products;
+                    renderProducts();
+                } else {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#fca5a5;">Failed to load products.</div>';
+                }
+            } catch (err) {
+                console.error("Error loading products:", err);
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#fca5a5;">Server offline or database error.</div>';
+            }
+        }
+
+        function renderProducts(itemsToRender) {
+            const grid = document.getElementById('productsGrid');
+            const items = itemsToRender || getFilteredProducts();
+
+            if (!items.length) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#94a3b8;">No addons found in this category.</div>';
+                return;
+            }
+
+            grid.innerHTML = items.map(p => {
+                let badgeHtml = '';
+                if (p.is_free) {
+                    badgeHtml = `<span class="prod-badge badge-free">FREE</span>`;
+                } else if (p.badge) {
+                    const bLower = p.badge.toLowerCase();
+                    const bClass = bLower.includes('hot') ? 'badge-hot' : bLower.includes('new') ? 'badge-new' : 'badge-popular';
+                    badgeHtml = `<span class="prod-badge ${bClass}">${p.badge}</span>`;
+                }
+
+                const priceDisplay = p.is_free 
+                    ? `<span class="price-current free">FREE</span>`
+                    : p.sale_price 
+                        ? `<span class="price-current">Rs. ${p.sale_price}</span> <span class="price-old">Rs. ${p.price}</span>`
+                        : `<span class="price-current">Rs. ${p.price}</span>`;
+
+                const actionButton = p.is_free
+                    ? `<button class="btn-get-free" onclick="claimFreeAddon(${p.id})">🎁 Download Free</button>`
+                    : `<button class="btn-add-cart" onclick="addToCart(${p.id})">🛒 Add to Cart</button>`;
+
+                return `
+                    <div class="product-card">
+                        <div class="prod-media">
+                            <img src="${p.image_url || 'Pictures & Videos/1.png'}" alt="${p.title}" onerror="this.src='Pictures & Videos/1.png'">
+                            ${badgeHtml}
+                            <span class="prod-cat-tag">${p.category}</span>
+                        </div>
+                        <div class="prod-body">
+                            <h3 class="prod-title">${p.title}</h3>
+                            <div class="prod-meta">
+                                <span>🎮 ${p.version}</span>
+                                <span>📦 ${p.file_size || 'TRS Addon'}</span>
+                            </div>
+                            <p class="prod-desc">${p.description}</p>
+                            <div class="prod-footer">
+                                <div class="prod-price">${priceDisplay}</div>
+                                ${actionButton}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getFilteredProducts() {
+            if (currentCategory === 'All') return allProducts;
+            if (currentCategory === 'Free') return allProducts.filter(p => p.is_free);
+            return allProducts.filter(p => p.category === currentCategory);
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderProducts();
+        }
+
+        function filterFreeOnly() {
+            currentCategory = 'Free';
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderProducts();
+        }
+
+        function handleSearch(query) {
+            const q = query.trim().toLowerCase();
+            if (!q) {
+                renderProducts();
+                return;
+            }
+            const filtered = allProducts.filter(p => 
+                p.title.toLowerCase().includes(q) || 
+                p.category.toLowerCase().includes(q) || 
+                p.description.toLowerCase().includes(q)
+            );
+            renderProducts(filtered);
+        }
+
+        // Cart Actions
+        function addToCart(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            const existing = cart.find(i => i.id === productId);
+            if (!existing) {
+                cart.push({
+                    id: product.id,
+                    title: product.title,
+                    price: product.sale_price || product.price,
+                    image_url: product.image_url || 'Pictures & Videos/1.png'
+                });
+                saveCartToStorage();
+            }
+            toggleCartDrawer(true);
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(i => i.id !== productId);
+            saveCartToStorage();
+        }
+
+        function updateCartUI() {
+            const badge = document.getElementById('navCartBadge');
+            badge.innerText = cart.length;
+
+            const container = document.getElementById('cartItemList');
+            const subtotalEl = document.getElementById('cartSubtotalAmount');
+            const btnCheckout = document.getElementById('btnCheckout');
+
+            if (!cart.length) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 40px 10px; color:#94a3b8;">
+                        <span style="font-size: 2.5rem; display:block; margin-bottom:10px;">🛒</span>
+                        Your cart is empty.<br>Select any locomotive or coach pack to get started!
+                    </div>
+                `;
+                subtotalEl.innerText = 'Rs. 0';
+                btnCheckout.disabled = true;
+                btnCheckout.style.opacity = '0.5';
+                return;
+            }
+
+            btnCheckout.disabled = false;
+            btnCheckout.style.opacity = '1';
+
+            let subtotal = 0;
+            container.innerHTML = cart.map(item => {
+                subtotal += item.price;
+                return `
+                    <div class="cart-item">
+                        <img src="${item.image_url}" alt="${item.title}">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.title}</div>
+                            <div class="cart-item-price">Rs. ${item.price}</div>
+                        </div>
+                        <button class="cart-item-remove" onclick="removeFromCart(${item.id})" title="Remove item">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+
+            subtotalEl.innerText = `Rs. ${subtotal}`;
+        }
+
+        function toggleCartDrawer(forceOpen) {
+            const drawer = document.getElementById('cartDrawer');
+            const backdrop = document.getElementById('cartBackdrop');
+            if (forceOpen === true) {
+                drawer.classList.add('open');
+                backdrop.classList.add('open');
+            } else if (forceOpen === false) {
+                drawer.classList.remove('open');
+                backdrop.classList.remove('open');
+            } else {
+                drawer.classList.toggle('open');
+                backdrop.classList.toggle('open');
+            }
+        }
+
+        // Checkout Modal Actions
+        function openCheckoutModal() {
+            if (!cart.length) return;
+            toggleCartDrawer(false);
+            updatePaymentInstructions();
+            document.getElementById('checkoutModal').classList.add('open');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.remove('open');
+        }
+
+        function updatePaymentInstructions() {
+            const method = document.getElementById('paymentMethod').value;
+            const titleEl = document.getElementById('payAccountTitle');
+            const numEl = document.getElementById('payAccountNumber');
+            const totalEl = document.getElementById('payTotalAmount');
+
+            let subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+            totalEl.innerText = `Rs. ${subtotal}`;
+
+            if (method === 'EasyPaisa') {
+                titleEl.innerText = "Waqas Rasool / TRS DEP PAK";
+                numEl.innerText = "0300-1234567 (EasyPaisa)";
+            } else if (method === 'JazzCash') {
+                titleEl.innerText = "Waqas Rasool / Pak Trainz";
+                numEl.innerText = "0300-1234567 (JazzCash)";
+            } else if (method === 'SadaPay') {
+                titleEl.innerText = "Waqas Rasool";
+                numEl.innerText = "0300-1234567 (SadaPay Wallet)";
+            } else {
+                titleEl.innerText = "TRS DEP PAK / Waqas Rasool";
+                numEl.innerText = "Raast ID: 03001234567 | Meezan Bank: 0102-xxxxxxxxxxx";
+            }
+        }
+
+        async function handlePlaceOrder(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitOrder');
+            const alertBox = document.getElementById('checkoutAlert');
+            alertBox.style.display = 'none';
+
+            const name = document.getElementById('custName').value.trim();
+            const email = document.getElementById('custEmail').value.trim();
+            const whatsapp = document.getElementById('custWhatsapp').value.trim();
+            const method = document.getElementById('paymentMethod').value;
+            const tid = document.getElementById('custTid').value.trim();
+
+            const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+
+            if (subtotal > 0 && !tid) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#fca5a5';
+                alertBox.innerText = 'Please enter your Transaction ID (TID) after sending payment.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Placing Order...';
+
+            try {
+                const res = await fetch('/api/orders/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_name: name,
+                        customer_email: email,
+                        customer_whatsapp: whatsapp,
+                        payment_method: method,
+                        transaction_id: tid,
+                        items: cart,
+                        total_amount: subtotal
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    // Empty cart
+                    cart = [];
+                    saveCartToStorage();
+                    closeCheckoutModal();
+                    // Show status
+                    checkOrderStatus(data.orderNumber);
+                } else {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                    alertBox.style.color = '#fca5a5';
+                    alertBox.innerText = data.error || 'Failed to place order';
+                }
+            } catch (err) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#fca5a5';
+                alertBox.innerText = 'Network error while placing order';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '✅ Confirm Order & Submit';
+            }
+        }
+
+        // Direct Free Addon Claiming
+        async function claimFreeAddon(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            const name = prompt("Enter your Name for Free Download:", "Trainz Railfan");
+            if (!name) return;
+            const email = prompt("Enter your Email to register your Free License:", "user@example.com");
+            if (!email) return;
+
+            try {
+                const res = await fetch('/api/orders/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_name: name,
+                        customer_email: email,
+                        customer_whatsapp: "Free Community User",
+                        payment_method: "Free Download",
+                        transaction_id: "FREE",
+                        items: [product],
+                        total_amount: 0
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    checkOrderStatus(data.orderNumber);
+                }
+            } catch (e) {
+                alert("Failed to claim free addon");
+            }
+        }
+
+        // Order Status & Download View
+        async function checkOrderStatus(orderNumber) {
+            const modal = document.getElementById('orderStatusModal');
+            const content = document.getElementById('orderStatusContent');
+            content.innerHTML = '<div style="text-align:center; padding:30px;">Loading order details...</div>';
+            modal.classList.add('open');
+
+            try {
+                const res = await fetch(`/api/orders/status/${orderNumber}`);
+                const data = await res.json();
+                if (!data.success || !data.order) {
+                    content.innerHTML = `<p style="color:#ef4444;">Order ${orderNumber} not found.</p>`;
+                    return;
+                }
+
+                const o = data.order;
+                const isApproved = o.status === 'approved';
+
+                let downloadSection = '';
+                if (isApproved && o.licenses && o.licenses.length) {
+                    downloadSection = `
+                        <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
+                            <h3 style="color:#4ade80; margin:0 0 10px 0;">📥 Your Addon Downloads &amp; License Keys</h3>
+                            ${o.licenses.map(lic => `
+                                <div style="background:rgba(255,255,255,0.04); padding:14px; border-radius:12px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.1);">
+                                    <div style="font-weight:bold; color:#fff; font-size:1rem; margin-bottom:4px;">${lic.product_title}</div>
+                                    <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:8px;">KUID: ${lic.kuid_info || 'PR Model'} • Version: ${lic.version}</div>
+                                    <div class="license-box">
+                                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:2px;">OFFICIAL LICENSE KEY</div>
+                                        <div class="license-key-text">${lic.license_key}</div>
+                                    </div>
+                                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                                        <a href="/api/download/secure/${lic.license_key}" class="btn primary" style="padding:8px 16px; font-size:0.88rem; text-decoration:none;">
+                                            🚀 Download .CDP File
+                                        </a>
+                                        <button class="btn secondary" style="padding:8px 16px; font-size:0.88rem;" onclick="navigator.clipboard.writeText('${lic.license_key}'); alert('License Key Copied!');">
+                                            📋 Copy Key
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    downloadSection = `
+                        <div style="background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:12px; padding:16px; margin-top:20px;">
+                            <h4 style="color:#f59e0b; margin:0 0 6px 0;">⏳ Verification Pending</h4>
+                            <p style="margin:0; font-size:0.88rem; color:#cbd5e1;">
+                                Aapka order submit ho chuka hai. Hamari team aapki payment (TID: <strong>${o.transaction_id}</strong>) verify karke foran download link aur License Key unlock karegi.
+                            </p>
+                            <p style="margin:8px 0 0 0; font-size:0.85rem;">
+                                Quick approval ke liye WhatsApp par message karein: 
+                                <a href="https://wa.me/923001234567?text=Assalam-o-Alaikum,%20maine%20TRS%20DEP%20PAK%20ka%20order%20place%20kiya%20hai%20Order%20ID:%20${o.order_number}" target="_blank" style="color:#64b5f6; font-weight:bold; text-decoration:underline;">
+                                    WhatsApp Support
+                                </a>
+                            </p>
+                        </div>
+                    `;
+                }
+
+                content.innerHTML = `
+                    <div style="font-size:0.9rem; color:#e2e8f0; line-height:1.6;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <span style="font-family:monospace; font-size:1.1rem; color:#38bdf8;">${o.order_number}</span>
+                            <span class="order-status-badge ${isApproved ? 'status-approved' : 'status-pending'}">
+                                ${isApproved ? '✅ APPROVED' : '⏳ PENDING'}
+                            </span>
+                        </div>
+                        <div class="pay-detail-row"><span>Customer:</span> <strong>${o.customer_name}</strong></div>
+                        <div class="pay-detail-row"><span>Email:</span> <strong>${o.customer_email}</strong></div>
+                        <div class="pay-detail-row"><span>Total Amount:</span> <strong>Rs. ${o.total_amount}</strong></div>
+                        <div class="pay-detail-row"><span>Payment Method:</span> <strong>${o.payment_method}</strong></div>
+                        ${downloadSection}
+                    </div>
+                `;
+            } catch (err) {
+                content.innerHTML = `<p style="color:#ef4444;">Failed to load order status.</p>`;
+            }
+        }
+
+        function closeOrderStatusModal() {
+            document.getElementById('orderStatusModal').classList.remove('open');
+        }
+
+        function showClientAppInfo() {
+            alert("TRS DEP PAK Client App (Phase 3):\n\nAfter your order is approved, your unique License Key can be entered directly into our Windows Client App to automatically install your locomotives into Trainz Railroad Simulator Content Manager without manual file copying!");
+        }
+
+        // On Page Load: Check URL for ?order=TRS-ORD-xxxx
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
+            loadCartFromStorage();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderNum = urlParams.get('order');
+            if (orderNum) {
+                checkOrderStatus(orderNum);
+            }
+        });
+    </script>
+</body>
+</html>

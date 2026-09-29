@@ -17,7 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(SESSION_SECRET));
 
-// Serve static directory (HTML, CSS, Pictures & Videos, etc.)
+// Serve static directory (public folder for Vercel CDN + root)
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname)));
 
 // Admin Auth Helper Middleware
