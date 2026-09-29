@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -42,7 +43,271 @@ function requireAdmin(req, res, next) {
 }
 
 // ──────────────────────────────────────────
-// PUBLIC API ROUTES
+// PUBLIC E-COMMERCE & STORE ROUTES
+// ──────────────────────────────────────────
+
+// 1. Get Store Products (with optional filter)
+app.get("/api/products", async (req, res) => {
+  try {
+    const { category, is_free } = req.query;
+    const filter = {};
+    if (category) filter.category = category;
+    if (is_free !== undefined) filter.is_free = is_free === "true" || is_free === "1";
+
+    const products = await db.getProducts(filter);
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).json({ error: "Failed to load products" });
+  }
+});
+
+// 2. Get Single Product
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const product = await db.getProductById(id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    res.json({ success: true, product });
+  } catch (err) {
+    console.error("Error fetching product:", err);
+    res.status(500).json({ error: "Failed to load product" });
+  }
+});
+
+// 3. Checkout Order (Customer places order)
+app.post("/api/orders/checkout", async (req, res) => {
+  try {
+    const {
+      customer_name,
+      customer_email,
+      customer_whatsapp,
+      payment_method,
+      transaction_id,
+      items,
+      total_amount
+    } = req.body;
+
+    if (!customer_name || !customer_email || !customer_whatsapp) {
+      return res.status(400).json({ error: "Name, email, and WhatsApp number are required" });
+    }
+
+    if (!items || !items.length) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    const result = await db.createOrder({
+      customer_name,
+      customer_email,
+      customer_whatsapp,
+      payment_method: payment_method || "EasyPaisa",
+      transaction_id: transaction_id || "N/A",
+      items,
+      total_amount: Number(total_amount) || 0,
+      currency: "PKR"
+    });
+
+    res.json({
+      success: true,
+      message: "Order placed successfully",
+      orderNumber: result.orderNumber,
+      orderId: result.orderId,
+      isAutoApproved: Number(total_amount) === 0
+    });
+  } catch (err) {
+    console.error("Checkout error:", err);
+    res.status(500).json({ error: "Failed to place order" });
+  }
+});
+
+// 4. Check Order Status & Retrieve License / Download
+app.get("/api/orders/status/:orderNumber", async (req, res) => {
+  try {
+    const orderNumber = req.params.orderNumber.trim();
+    const order = await db.getOrder(orderNumber);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error("Error fetching order status:", err);
+    res.status(500).json({ error: "Failed to load order status" });
+  }
+});
+
+// 5. Secure Tokenized File Download Delivery
+app.get("/api/download/secure/:licenseKey", async (req, res) => {
+  try {
+    const licenseKey = req.params.licenseKey.trim();
+    const result = await db.verifyAndConsumeDownload(licenseKey);
+
+    if (!result.valid) {
+      return res.status(403).send(`
+        <div style="font-family:sans-serif; text-align:center; padding: 50px; background:#0d1520; color:#fff; min-height:100vh;">
+          <h2 style="color:#f44336;">Download Error</h2>
+          <p>${result.error}</p>
+          <a href="/store.html" style="color:#64b5f6; font-weight:bold;">Return to Store</a>
+        </div>
+      `);
+    }
+
+    const fileUrl = result.file_url;
+
+    // A. External Cloud Storage (e.g. Cloudflare R2, Google Drive, MediaFire)
+    if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
+      return res.redirect(fileUrl);
+    }
+
+    // B. Local File Delivery
+    const localFilePath = path.join(__dirname, fileUrl);
+    if (fs.existsSync(localFilePath)) {
+      return res.download(localFilePath, path.basename(localFilePath));
+    } else {
+      return res.status(404).send(`
+        <div style="font-family:sans-serif; text-align:center; padding: 50px; background:#0d1520; color:#fff; min-height:100vh;">
+          <h2 style="color:#ff9800;">File Notice</h2>
+          <p>This add-on pack is currently being uploaded to the high-speed cloud CDN. Please check back shortly or message our WhatsApp support.</p>
+          <a href="/store.html" style="color:#64b5f6; font-weight:bold;">Return to Store</a>
+        </div>
+      `);
+    }
+  } catch (err) {
+    console.error("Download error:", err);
+    res.status(500).send("Internal download error");
+  }
+});
+
+// ──────────────────────────────────────────
+// PHASE 3: CLIENT APP / DRM AUTH ENDPOINTS
+// ──────────────────────────────────────────
+
+// Verify License Key for TRS DEP PAK Windows Launcher
+app.post("/api/client/verify-license", async (req, res) => {
+  try {
+    const { email, license_key, hwid } = req.body;
+    if (!email || !license_key) {
+      return res.status(400).json({ success: false, error: "Email and License Key required" });
+    }
+
+    const check = await db.verifyClientAppLicense(email, license_key, hwid);
+    res.json(check);
+  } catch (err) {
+    console.error("Client license verification error:", err);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
+// ──────────────────────────────────────────
+// ADMIN E-COMMERCE & STORE APIS
+// ──────────────────────────────────────────
+
+// Store Revenue & Stats Overview
+app.get("/api/admin/store-stats", requireAdmin, async (req, res) => {
+  try {
+    const stats = await db.getStoreStats();
+    res.json({ success: true, stats });
+  } catch (err) {
+    console.error("Stats error:", err);
+    res.status(500).json({ error: "Failed to load store stats" });
+  }
+});
+
+// List all customer orders
+app.get("/api/admin/orders", requireAdmin, async (req, res) => {
+  try {
+    const orders = await db.getAllOrders();
+    res.json({ success: true, orders });
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    res.status(500).json({ error: "Failed to load orders" });
+  }
+});
+
+// Approve Order (Auto-generates License Keys)
+app.post("/api/admin/orders/:id/approve", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { admin_notes } = req.body;
+    const result = await db.approveOrder(id, admin_notes);
+    if (!result) return res.status(404).json({ error: "Order not found" });
+    res.json({ success: true, message: "Order approved and license keys generated", order: result });
+  } catch (err) {
+    console.error("Approve order error:", err);
+    res.status(500).json({ error: "Failed to approve order" });
+  }
+});
+
+// Reject Order
+app.post("/api/admin/orders/:id/reject", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { reason } = req.body;
+    await db.rejectOrder(id, reason);
+    res.json({ success: true, message: "Order rejected" });
+  } catch (err) {
+    console.error("Reject order error:", err);
+    res.status(500).json({ error: "Failed to reject order" });
+  }
+});
+
+// Add Store Product
+app.post("/api/admin/products", requireAdmin, async (req, res) => {
+  try {
+    const {
+      title,
+      category,
+      price,
+      sale_price,
+      currency,
+      is_free,
+      image_url,
+      file_url,
+      file_size,
+      version,
+      description,
+      kuid_info,
+      badge
+    } = req.body;
+
+    if (!title || !file_url) {
+      return res.status(400).json({ error: "Title and File URL are required" });
+    }
+
+    const newId = await db.addProduct({
+      title,
+      category: category || "Locomotives",
+      price: Number(price) || 0,
+      sale_price: sale_price ? Number(sale_price) : null,
+      currency: currency || "PKR",
+      is_free: is_free === true || is_free === "true" || Number(price) === 0,
+      image_url: image_url || "Pictures & Videos/1.png",
+      file_url,
+      file_size: file_size || "",
+      version: version || "TRS19 / TRS22",
+      description: description || "",
+      kuid_info: kuid_info || "",
+      badge: badge || ""
+    });
+
+    res.json({ success: true, id: newId, message: "Product created successfully" });
+  } catch (err) {
+    console.error("Add product error:", err);
+    res.status(500).json({ error: "Failed to add product" });
+  }
+});
+
+// Delete Store Product
+app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await db.deleteProduct(id);
+    res.json({ success: true, message: "Product deleted" });
+  } catch (err) {
+    console.error("Delete product error:", err);
+    res.status(500).json({ error: "Failed to delete product" });
+  }
+});
+
+// ──────────────────────────────────────────
+// EXISTING PUBLIC API ROUTES (Downloads, Gallery, Videos)
 // ──────────────────────────────────────────
 
 // 1. Get all downloads
@@ -108,7 +373,6 @@ app.post("/api/admin/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // Set signed cookie for 30 days
     const sessionData = JSON.stringify({ id: admin.id, username: admin.username, role: admin.role });
     res.cookie("pak_trainz_auth", sessionData, {
       httpOnly: true,
@@ -163,11 +427,7 @@ app.post("/api/admin/change-password", requireAdmin, async (req, res) => {
   }
 });
 
-// ──────────────────────────────────────────
-// ADMIN CRUD OPERATIONS
-// ──────────────────────────────────────────
-
-// Add Download Pack
+// Existing Admin Legacy Routes
 app.post("/api/admin/downloads", requireAdmin, async (req, res) => {
   try {
     const { title, category, file_url, file_size, version, description } = req.body;
@@ -189,7 +449,6 @@ app.post("/api/admin/downloads", requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Download Pack
 app.delete("/api/admin/downloads/:id", requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -201,7 +460,6 @@ app.delete("/api/admin/downloads/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Add Gallery Image
 app.post("/api/admin/gallery", requireAdmin, async (req, res) => {
   try {
     const { title, image_url, category, sort_order } = req.body;
@@ -221,7 +479,6 @@ app.post("/api/admin/gallery", requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Gallery Image
 app.delete("/api/admin/gallery/:id", requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -233,7 +490,6 @@ app.delete("/api/admin/gallery/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// Add Video
 app.post("/api/admin/videos", requireAdmin, async (req, res) => {
   try {
     const { title, video_url, thumbnail_url, duration, sort_order } = req.body;
@@ -254,7 +510,6 @@ app.post("/api/admin/videos", requireAdmin, async (req, res) => {
   }
 });
 
-// Delete Video
 app.delete("/api/admin/videos/:id", requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -273,11 +528,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+app.get("/store", (req, res) => {
+  res.sendFile(path.join(__dirname, "store.html"));
+});
+
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
 
-// Start Server
+// Server Initialization
 async function start() {
   try {
     await db.initDatabase();
@@ -289,4 +548,11 @@ async function start() {
   }
 }
 
-start();
+// In standard local development run start(). On Vercel, init asynchronously and export app.
+if (!process.env.VERCEL) {
+  start();
+} else {
+  db.initDatabase().catch(err => console.error("Vercel DB Init Error:", err));
+}
+
+module.exports = app;
