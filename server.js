@@ -180,6 +180,16 @@ app.get("/api/download/secure/:licenseKey", async (req, res) => {
 // PHASE 3: CLIENT APP / DRM AUTH ENDPOINTS
 // ──────────────────────────────────────────
 
+// Direct Download Windows Client App Package
+app.get("/api/download/client-app", (req, res) => {
+  const filePath = path.join(__dirname, "public", "downloads", "TRS-DEP-PAK-Launcher.zip");
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, "TRS-DEP-PAK-Launcher.zip");
+  } else {
+    res.status(404).send("Client launcher package not found.");
+  }
+});
+
 // Verify License Key for TRS DEP PAK Windows Launcher
 app.post("/api/client/verify-license", async (req, res) => {
   try {

@@ -224,6 +224,31 @@ ipcMain.handle('inject-addon-into-trainz', async (event, args) => {
       installOutput = "Content prepared. (TrainzUtil path not specified, please point Trainz directory in Settings).";
     }
 
+    // 2.5 Generate Local Hardware DRM Signature Token (For Trainz In-Game Anti-Piracy Check)
+    try {
+      const hwid = getHardwareID();
+      const tokenData = JSON.stringify({
+        hwid,
+        registered_machine: os.hostname(),
+        timestamp: new Date().toISOString(),
+        product: productTitle,
+        signature: crypto.createHmac('sha256', 'PAK_TRAINZ_MASTER_DRM_KEY_2026').update(`${hwid}_${productTitle}`).digest('hex')
+      }, null, 2);
+
+      const appDataDir = path.join(process.env.LOCALAPPDATA || os.homedir(), 'PakTrainzDRM');
+      if (!fs.existsSync(appDataDir)) fs.mkdirSync(appDataDir, { recursive: true });
+      fs.writeFileSync(path.join(appDataDir, 'license.lic'), tokenData, 'utf8');
+
+      if (trainzPath) {
+        const uDir = path.join(trainzPath, 'UserData');
+        if (fs.existsSync(uDir)) {
+          fs.writeFileSync(path.join(uDir, 'pak_trainz_hwid.lic'), tokenData, 'utf8');
+        }
+      }
+    } catch (tokenErr) {
+      console.warn("Local token writing note:", tokenErr.message);
+    }
+
     // 3. SECURE WIPE: Delete temporary file immediately so raw CDP cannot be copied
     try {
       if (fs.existsSync(tempFilePath)) {

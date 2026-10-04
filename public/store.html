@@ -543,6 +543,7 @@
         <nav class="nav-links">
             <a href="/">Home</a>
             <a href="/store.html" style="background: rgba(37, 99, 235, 0.4); color: #fff; font-weight: bold;">🛒 Store</a>
+            <a href="/downloads/TRS-DEP-PAK-Launcher.zip" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: bold; border-radius: 8px;">🖥️ Client App</a>
             <a href="/gallery.html">Gallery</a>
             <a href="/videos.html">Videos</a>
             <a href="/#downloads">Downloads</a>
@@ -565,6 +566,14 @@
             <p>
                 Get authentic, high-detail Pakistan Railways Locomotives (HGMU-30, ALU-24), Air-conditioned Coaches, Power Vans, and Mainline Routes designed for Trainz Railroad Simulator (TRS19 &amp; TRS22).
             </p>
+            <div style="margin-top: 18px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="/downloads/TRS-DEP-PAK-Launcher.zip" class="btn primary" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                    🖥️ Download Official Client App (Windows)
+                </a>
+                <button class="btn secondary" onclick="showClientAppInfo()" style="padding: 12px 20px; border-radius: 10px;">
+                    ℹ️ How Client App Works
+                </button>
+            </div>
         </section>
 
         <!-- Filter & Search Controls -->
@@ -1116,6 +1125,9 @@
                                         <div class="license-key-text">${lic.license_key}</div>
                                     </div>
                                     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                                        <a href="/downloads/TRS-DEP-PAK-Launcher.zip" class="btn" style="padding:8px 16px; font-size:0.88rem; text-decoration:none; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-weight:bold;">
+                                            🖥️ Install via Client App (1-Click)
+                                        </a>
                                         <a href="/api/download/secure/${lic.license_key}" class="btn primary" style="padding:8px 16px; font-size:0.88rem; text-decoration:none;">
                                             🚀 Download .CDP File
                                         </a>
