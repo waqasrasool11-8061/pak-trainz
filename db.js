@@ -192,6 +192,42 @@ async function initDatabase() {
     console.error("[db] Error seeding settings:", err.message);
   }
 
+  // Developer & Core Team Devices Table (Master Bypass for Waqas, Asif, Usman)
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS pak_dev_devices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      developer_name TEXT NOT NULL,
+      device_name TEXT NOT NULL,
+      location TEXT NOT NULL,
+      hwid TEXT,
+      notes TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Seed default developer devices if empty
+  try {
+    const devRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_dev_devices");
+    const devCount = Number(devRes.rows[0]?.cnt ?? devRes.rows[0]?.[0] ?? 0);
+    if (devCount === 0) {
+      const initialDevs = [
+        { developer_name: "Waqas Rasool", device_name: "Waqas Master PC & Laptop", location: "Rawalpindi", notes: "Super Admin & Project Lead" },
+        { developer_name: "Asif Khan", device_name: "Asif Workstation", location: "Karachi", notes: "Core 3D Locomotive Designer" },
+        { developer_name: "Usman Mani", device_name: "Usman Qatar Setup", location: "Qatar", notes: "Overseas Lead Developer" }
+      ];
+      for (const d of initialDevs) {
+        await db.execute({
+          sql: "INSERT INTO pak_dev_devices (developer_name, device_name, location, notes, is_active) VALUES (?, ?, ?, ?, 1)",
+          args: [d.developer_name, d.device_name, d.location, d.notes]
+        });
+      }
+      console.log("[db] Initialized 3 core developer master device profiles");
+    }
+  } catch (err) {
+    console.error("[db] Error seeding developer devices:", err.message);
+  }
+
   // Seed default admin if empty
   try {
     const adminRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_admins");
@@ -869,9 +905,79 @@ async function verifyAndConsumeDownload(licenseKey) {
   };
 }
 
+// ──────────────────────────────────────────
+// DEVELOPER & MASTER BYPASS METHODS (Phase 3 Core Team)
+// ──────────────────────────────────────────
+
+async function getDeveloperDevices() {
+  const db = getClient();
+  const res = await db.execute("SELECT * FROM pak_dev_devices ORDER BY id ASC");
+  return res.rows.map(r => ({
+    id: Number(r.id),
+    developer_name: String(r.developer_name || ""),
+    device_name: String(r.device_name || ""),
+    location: String(r.location || ""),
+    hwid: r.hwid ? String(r.hwid) : "",
+    notes: r.notes ? String(r.notes) : "",
+    is_active: Number(r.is_active ?? 1),
+    created_at: String(r.created_at || "")
+  }));
+}
+
+async function addDeveloperDevice(data) {
+  const db = getClient();
+  const res = await db.execute({
+    sql: "INSERT INTO pak_dev_devices (developer_name, device_name, location, hwid, notes, is_active) VALUES (?, ?, ?, ?, ?, 1)",
+    args: [data.developer_name, data.device_name, data.location || "Pakistan", data.hwid || "", data.notes || ""]
+  });
+  return res.lastInsertRowid;
+}
+
+async function deleteDeveloperDevice(id) {
+  const db = getClient();
+  await db.execute({
+    sql: "DELETE FROM pak_dev_devices WHERE id = ?",
+    args: [id]
+  });
+}
+
+async function isDeveloperWhitelisted(email, hwid) {
+  const db = getClient();
+  if (hwid) {
+    const hwRes = await db.execute({
+      sql: "SELECT id FROM pak_dev_devices WHERE hwid = ? AND is_active = 1",
+      args: [hwid.trim()]
+    });
+    if (hwRes.rows.length > 0) return true;
+  }
+  if (email) {
+    const em = email.toLowerCase().trim();
+    if (em.includes("waqas") || em.includes("asif") || em.includes("usman") || em.includes("admin")) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Client App Authentication & License Verification (Phase 3 Ready!)
 async function verifyClientAppLicense(email, licenseKey, hwid) {
   const db = getClient();
+  const isDev = await isDeveloperWhitelisted(email, hwid);
+
+  // 1. Developer Master Bypass Key Check (Unlocks All Products!)
+  const cleanKey = (licenseKey || "").trim().toUpperCase();
+  if (cleanKey === "TRS-MASTER-BYPASS" || cleanKey === "TRS-DEV-ALL" || cleanKey.startsWith("TRS-MASTER-")) {
+    const allProds = await getProducts();
+    return {
+      success: true,
+      is_developer: true,
+      master_bypass: true,
+      developer_notice: "👑 Developer Master Mode: All Pakistan Railways Addons Unlocked (Zero HWID Lock)",
+      products: allProds
+    };
+  }
+
+  // 2. Standard License Verification
   const res = await db.execute({
     sql: `SELECT l.*, p.file_url, p.kuid_info, p.version, p.title 
           FROM pak_licenses l
@@ -889,8 +995,8 @@ async function verifyClientAppLicense(email, licenseKey, hwid) {
     return { success: false, error: "This license has been suspended." };
   }
 
-  // Check / Set HWID Lock
-  if (hwid) {
+  // 3. HWID Lock: Bypassed for verified developer devices, strictly enforced for customers
+  if (hwid && !isDev) {
     if (!lic.hwid_lock) {
       // First time activation on a PC -> lock HWID
       await db.execute({
@@ -904,6 +1010,7 @@ async function verifyClientAppLicense(email, licenseKey, hwid) {
 
   return {
     success: true,
+    is_developer: isDev,
     product: {
       id: Number(lic.product_id),
       title: String(lic.title),
@@ -911,6 +1018,48 @@ async function verifyClientAppLicense(email, licenseKey, hwid) {
       kuid: String(lic.kuid_info || ""),
       download_url: String(lic.file_url)
     }
+  };
+}
+
+// Direct Developer Login from Desktop Client App (Waqas, Asif, Usman)
+async function developerClientLogin(username, password, hwid) {
+  let admin = await authenticateAdmin(username, password);
+  if (!admin) {
+    // Master developer key fallback for core team members (Waqas, Asif, Usman)
+    if (password === "TRS-MASTER-BYPASS" || password === "trainz123" || password === "TRS-DEV-ALL") {
+      admin = { username: username || "Core Developer", role: "admin" };
+    } else {
+      return { success: false, error: "Invalid developer/admin username or password." };
+    }
+  }
+
+  // Auto-register device HWID in pak_dev_devices if not present
+  if (hwid) {
+    try {
+      const db = getClient();
+      const existing = await db.execute({
+        sql: "SELECT id FROM pak_dev_devices WHERE hwid = ?",
+        args: [hwid.trim()]
+      });
+      if (!existing.rows.length) {
+        await db.execute({
+          sql: "INSERT INTO pak_dev_devices (developer_name, device_name, location, hwid, notes, is_active) VALUES (?, ?, ?, ?, ?, 1)",
+          args: [admin.username, `${admin.username} PC/Workstation`, "Auto-Registered Machine", hwid.trim(), "Auto-registered via Desktop Client Login"]
+        });
+      }
+    } catch (e) {
+      console.warn("Dev device auto-register:", e.message);
+    }
+  }
+
+  const allProds = await getProducts();
+  return {
+    success: true,
+    is_developer: true,
+    master_bypass: true,
+    developer_name: admin.username,
+    developer_notice: `👑 Welcome ${admin.username}! Master Developer Mode Active (Unrestricted access across all machines).`,
+    products: allProds
   };
 }
 
@@ -1097,6 +1246,12 @@ module.exports = {
   // Payment Accounts & Settings
   getPaymentSettings,
   updatePaymentSettings,
+  // Developer & Core Team Devices (Phase 3 Master Bypass)
+  getDeveloperDevices,
+  addDeveloperDevice,
+  deleteDeveloperDevice,
+  isDeveloperWhitelisted,
+  developerClientLogin,
   // Orders & Licenses
   createOrder,
   getOrder,

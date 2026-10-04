@@ -196,6 +196,59 @@ app.post("/api/client/verify-license", async (req, res) => {
   }
 });
 
+// Direct Developer Login from Desktop Client App (Waqas, Asif, Usman)
+app.post("/api/client/developer-login", async (req, res) => {
+  try {
+    const { username, password, hwid } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: "Developer username and password required" });
+    }
+    const result = await db.developerClientLogin(username, password, hwid);
+    res.json(result);
+  } catch (err) {
+    console.error("Client developer login error:", err);
+    res.status(500).json({ success: false, error: "Internal server error during developer authentication" });
+  }
+});
+
+// List Authorized Developer Devices (Waqas, Asif, Usman)
+app.get("/api/admin/developer-devices", requireAdmin, async (req, res) => {
+  try {
+    const devices = await db.getDeveloperDevices();
+    res.json({ success: true, devices });
+  } catch (err) {
+    console.error("Error fetching developer devices:", err);
+    res.status(500).json({ error: "Failed to load developer devices" });
+  }
+});
+
+// Add / Whitelist a New Device or Laptop
+app.post("/api/admin/developer-devices", requireAdmin, async (req, res) => {
+  try {
+    const { developer_name, device_name, location, hwid, notes } = req.body;
+    if (!developer_name || !device_name) {
+      return res.status(400).json({ error: "Developer Name and Device Name are required" });
+    }
+    const newId = await db.addDeveloperDevice({ developer_name, device_name, location, hwid, notes });
+    res.json({ success: true, id: newId, message: "Developer device whitelisted successfully" });
+  } catch (err) {
+    console.error("Error adding developer device:", err);
+    res.status(500).json({ error: "Failed to whitelist developer device" });
+  }
+});
+
+// Delete / Revoke a Developer Device
+app.delete("/api/admin/developer-devices/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await db.deleteDeveloperDevice(id);
+    res.json({ success: true, message: "Developer device removed successfully" });
+  } catch (err) {
+    console.error("Error deleting developer device:", err);
+    res.status(500).json({ error: "Failed to delete developer device" });
+  }
+});
+
 // ──────────────────────────────────────────
 // ADMIN E-COMMERCE & STORE APIS
 // ──────────────────────────────────────────

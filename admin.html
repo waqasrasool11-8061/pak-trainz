@@ -168,6 +168,7 @@
                 <button class="tab-btn active" onclick="switchTab('orders')">🛒 Customer Orders</button>
                 <button class="tab-btn" onclick="switchTab('products')">💎 Store Products</button>
                 <button class="tab-btn" onclick="switchTab('payment-settings')">💳 Payment Accounts</button>
+                <button class="tab-btn" onclick="switchTab('developer-devices')">👑 Developer PCs (Master Bypass)</button>
                 <button class="tab-btn" onclick="switchTab('downloads')">📥 Downloads (.cdp)</button>
                 <button class="tab-btn" onclick="switchTab('gallery')">🖼️ Gallery Photos</button>
                 <button class="tab-btn" onclick="switchTab('videos')">🎬 Video Showcases</button>
@@ -401,6 +402,110 @@
                             💾 Save Payment Accounts &amp; Update Store
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- TAB: DEVELOPER PCS (MASTER BYPASS) -->
+            <div id="tab-developer-devices" class="admin-tab-pane">
+                <div style="background: rgba(11,23,51,0.85); border: 1px solid rgba(255,255,255,0.12); border-radius:18px; padding:24px; margin-bottom: 24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h3 style="margin:0; color:#fff; font-size:1.3rem;">👑 Core Team &amp; Developer Devices (Master DRM Bypass)</h3>
+                            <p style="margin:6px 0 0 0; color:#94a3b8; font-size:0.88rem; max-width:800px;">
+                                Waqas Rasool (Rawalpindi), Asif Khan (Karachi), aur Usman Mani (Qatar) ke laptops aur PCs yahan manage hote hain. In machines par koi hardware lock ya license restriction nahi hoti — client app me direct 100% unrestricted access rehti hai.
+                            </p>
+                        </div>
+                        <button class="btn secondary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="loadDeveloperDevices()">🔄 Refresh Devices</button>
+                    </div>
+
+                    <!-- 3 Core Team Badges -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px; margin-bottom:24px;">
+                        <div style="background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.3); border-radius:12px; padding:14px;">
+                            <div style="font-weight:bold; color:#4ade80; font-size:1rem;">Waqas Rasool</div>
+                            <div style="color:#94a3b8; font-size:0.82rem;">📍 Rawalpindi, Pakistan &bull; Super Admin</div>
+                            <div style="font-size:0.78rem; color:#cbd5e1; margin-top:4px;">Master Access &bull; Unlimited PCs &amp; Laptops</div>
+                        </div>
+
+                        <div style="background:rgba(56, 189, 248, 0.1); border:1px solid rgba(56, 189, 248, 0.3); border-radius:12px; padding:14px;">
+                            <div style="font-weight:bold; color:#38bdf8; font-size:1rem;">Asif Khan / Asif Hussain</div>
+                            <div style="color:#94a3b8; font-size:0.82rem;">📍 Karachi, Pakistan &bull; Core 3D Designer</div>
+                            <div style="font-size:0.78rem; color:#cbd5e1; margin-top:4px;">Locomotive Developer &bull; Multi-Workstation</div>
+                        </div>
+
+                        <div style="background:rgba(168, 85, 247, 0.1); border:1px solid rgba(168, 85, 247, 0.3); border-radius:12px; padding:14px;">
+                            <div style="font-weight:bold; color:#c084fc; font-size:1rem;">Usman Mani</div>
+                            <div style="color:#94a3b8; font-size:0.82rem;">📍 Qatar &bull; Overseas Lead Developer</div>
+                            <div style="font-size:0.78rem; color:#cbd5e1; margin-top:4px;">International Remote Access &bull; Full Bypass</div>
+                        </div>
+                    </div>
+
+                    <!-- Master Bypass Notice -->
+                    <div style="background:rgba(245, 158, 11, 0.08); border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 10px 10px 0; margin-bottom:20px; font-size:0.88rem; color:#fde68a;">
+                        ⚡ <strong>Master Bypass Key:</strong> Client App me agar aap License Key ki jagah <code style="background:#000; padding:2px 6px; border-radius:4px; color:#38bdf8;">TRS-MASTER-BYPASS</code> likhein ya neeche <strong>"👑 Developer Login"</strong> karein, to koi bhi model bina kisi restriction ke Trainz me install ho jayega!
+                    </div>
+
+                    <!-- Split Panel: Whitelisted Devices List + Add New Device -->
+                    <div class="admin-panel-split">
+                        <!-- Devices Table -->
+                        <div class="admin-list-panel" style="flex:1.5;">
+                            <h4 style="margin:0 0 12px 0; color:#fff;">Authorized Whitelisted Machines</h4>
+                            <div class="table-responsive">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Developer</th>
+                                            <th>Device / PC Name</th>
+                                            <th>Location</th>
+                                            <th>HWID / Identifier</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="devDevicesTableBody">
+                                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Loading developer devices...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Add Device Form -->
+                        <div class="admin-form-panel" style="flex:1;">
+                            <h4 style="margin:0 0 6px 0; color:#fff;">➕ Whitelist New Machine</h4>
+                            <p class="panel-desc">Kisi naye laptop ya PC ko Master Bypass list me add karein.</p>
+
+                            <form id="addDevDeviceForm" onsubmit="handleAddDevDevice(event)">
+                                <div class="form-group">
+                                    <label>Developer *</label>
+                                    <select id="devDevMember" required>
+                                        <option value="Waqas Rasool">Waqas Rasool (Rawalpindi)</option>
+                                        <option value="Asif Khan">Asif Khan (Karachi)</option>
+                                        <option value="Usman Mani">Usman Mani (Qatar)</option>
+                                        <option value="Core Developer">Other Core Team Member</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Device Name *</label>
+                                    <input type="text" id="devDevName" required placeholder="e.g. Waqas HP Laptop / Asif Rig 2">
+                                </div>
+                                <div class="form-group">
+                                    <label>Location / City *</label>
+                                    <input type="text" id="devDevLocation" required placeholder="e.g. Rawalpindi / Karachi / Qatar">
+                                </div>
+                                <div class="form-group">
+                                    <label>Hardware ID (HWID) (Optional)</label>
+                                    <input type="text" id="devDevHwid" placeholder="Leave blank to allow any HWID for this device">
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes / Purpose</label>
+                                    <input type="text" id="devDevNotes" placeholder="e.g. 3ds Max test rig / Trainz 22 build">
+                                </div>
+                                <div id="addDevAlert" style="display:none; padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem;"></div>
+                                <button type="submit" id="btnAddDevBtn" class="btn primary" style="width:100%; padding:10px;">
+                                    👑 Whitelist This Machine
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -693,6 +798,7 @@
             loadAdminOrders();
             loadAdminProducts();
             loadPaymentSettings();
+            loadDeveloperDevices();
             loadAdminDownloads();
             loadAdminGallery();
             loadAdminVideos();
@@ -1100,6 +1206,117 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = '💾 Save Payment Accounts & Update Store';
+            }
+        }
+
+        // ──────────────────────────────────────────
+        // DEVELOPER & CORE TEAM DEVICES (MASTER BYPASS)
+        // ──────────────────────────────────────────
+
+        async function loadDeveloperDevices() {
+            const tbody = document.getElementById('devDevicesTableBody');
+            if (!tbody) return;
+            try {
+                const res = await fetch('/api/admin/developer-devices');
+                const data = await res.json();
+                if (data.success && data.devices) {
+                    if (!data.devices.length) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No developer devices registered yet.</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = data.devices.map(d => `
+                        <tr>
+                            <td>
+                                <strong style="color:#fff;">${d.developer_name}</strong>
+                                ${d.notes ? `<div style="font-size:0.78rem; color:#94a3b8;">${d.notes}</div>` : ''}
+                            </td>
+                            <td><span style="color:#38bdf8; font-weight:600;">${d.device_name}</span></td>
+                            <td>📍 ${d.location}</td>
+                            <td>
+                                <span style="font-family:monospace; font-size:0.8rem; background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:4px; color:#a5b4fc;">
+                                    ${d.hwid || 'ALL HWIDs (Full Bypass)'}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="order-status-badge status-approved" style="font-size:0.75rem; padding:3px 8px;">
+                                    👑 WHITELISTED
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn secondary" style="padding:4px 10px; font-size:0.75rem; background:rgba(239,68,68,0.2); color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="handleDeleteDevDevice(${d.id})">
+                                    🗑️ Remove
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Load dev devices error:", err);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Failed to load developer devices.</td></tr>';
+            }
+        }
+
+        async function handleAddDevDevice(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('addDevAlert');
+            const submitBtn = document.getElementById('btnAddDevBtn');
+            alertBox.style.display = 'none';
+
+            const payload = {
+                developer_name: document.getElementById('devDevMember').value,
+                device_name: document.getElementById('devDevName').value.trim(),
+                location: document.getElementById('devDevLocation').value.trim(),
+                hwid: document.getElementById('devDevHwid').value.trim(),
+                notes: document.getElementById('devDevNotes').value.trim()
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Whitelisting...';
+
+            try {
+                const res = await fetch('/api/admin/developer-devices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    alertBox.style.color = '#86efac';
+                    alertBox.textContent = 'Device whitelisted successfully with Master Bypass!';
+                    document.getElementById('addDevDeviceForm').reset();
+                    loadDeveloperDevices();
+                } else {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.textContent = data.error || 'Failed to add device';
+                }
+            } catch (err) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#f87171';
+                alertBox.textContent = 'Server connection error';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '👑 Whitelist This Machine';
+            }
+        }
+
+        async function handleDeleteDevDevice(id) {
+            if (!confirm('Are you sure you want to remove this machine from the Developer Whitelist?')) return;
+            try {
+                const res = await fetch(`/api/admin/developer-devices/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadDeveloperDevices();
+                } else {
+                    alert(data.error || 'Failed to delete device');
+                }
+            } catch (e) {
+                alert('Connection error');
             }
         }
 

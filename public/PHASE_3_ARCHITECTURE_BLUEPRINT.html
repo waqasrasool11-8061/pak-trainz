@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRS DEP PAK - Phase 3 Architecture Blueprint & DRM Specification</title>
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --surface-color: #1e293b;
+            --surface-card: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.2);
+            --accent: #38bdf8;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #a855f7;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+        /* Top Action Bar */
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-print:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Document Header */
+        .doc-header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 35px 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        .badge-tag {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .doc-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .doc-header p.subtitle {
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.88rem;
+        }
+
+        .meta-item span.label {
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .meta-item span.val {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Sections */
+        .section-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .section-title span.num {
+            background: var(--primary);
+            color: #000;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        /* Flow Diagrams */
+        .flow-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            background: var(--surface-color);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .flow-step .step-badge {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .flow-step h4 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .flow-step p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Highlight Boxes */
+        .highlight-box {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 18px 0;
+            font-size: 0.92rem;
+        }
+
+        .vip-box {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-left: 5px solid var(--purple);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .vip-box h3 {
+            color: #d8b4fe;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Team Cards */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .member-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .member-name {
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .member-loc {
+            color: var(--accent);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .member-privilege {
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px dashed rgba(16, 185, 129, 0.3);
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        /* Tables */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.88rem;
+        }
+
+        table.data-table th, table.data-table td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        table.data-table th {
+            background: var(--surface-color);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        table.data-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .code-pill {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.4);
+            color: #38bdf8;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+        }
+
+        /* Print Specific Styling */
+        @media print {
+            body {
+                background: #fff !important;
+                color: #111 !important;
+                padding: 0 !important;
+            }
+
+            .actions-bar {
+                display: none !important;
+            }
+
+            .doc-header {
+                background: #f8fafc !important;
+                border: 1px solid #ccc !important;
+                color: #000 !important;
+            }
+
+            .doc-header h1 {
+                background: none !important;
+                -webkit-text-fill-color: #000 !important;
+                color: #000 !important;
+            }
+
+            .section-card {
+                background: #fff !important;
+                border: 1px solid #ddd !important;
+                color: #222 !important;
+                page-break-inside: avoid;
+                margin-bottom: 20px !important;
+            }
+
+            .section-title {
+                color: #000 !important;
+                border-bottom: 2px solid #ccc !important;
+            }
+
+            .flow-step {
+                background: #f8fafc !important;
+                border: 1px solid #ddd !important;
+                color: #111 !important;
+            }
+
+            .flow-step h4 {
+                color: #000 !important;
+            }
+
+            .vip-box {
+                background: #faf5ff !important;
+                border: 1px solid #c084fc !important;
+                color: #111 !important;
+            }
+
+            .member-card {
+                background: #f8fafc !important;
+                border: 1px solid #ddd !important;
+            }
+
+            .member-name {
+                color: #000 !important;
+            }
+
+            table.data-table th {
+                background: #e2e8f0 !important;
+                color: #000 !important;
+            }
+
+            table.data-table td {
+                color: #111 !important;
+            }
+
+            .code-pill {
+                background: #eee !important;
+                color: #0369a1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Action Bar -->
+        <div class="actions-bar">
+            <div>
+                <strong>📄 Official Engineering Blueprint</strong> &mdash; 
+                <span style="color:var(--text-muted); font-size:0.9rem;">TRS DEP PAK Client App &amp; DRM Protection</span>
+            </div>
+            <button class="btn-print" onclick="window.print()">
+                🖨️ Save as PDF / Print Document
+            </button>
+        </div>
+
+        <!-- Document Header -->
+        <div class="doc-header">
+            <span class="badge-tag">Phase 3 Technical Blueprint</span>
+            <h1>TRS DEP PAK Windows Client App &amp; DRM Architecture</h1>
+            <p class="subtitle">Complete End-to-End System Design: Anti-Piracy, Trainz Injection &amp; 3-Developer VIP Master Bypass</p>
+            
+            <p style="color:#cbd5e1; font-size:0.95rem; max-width:850px;">
+                Yeh document Trainz Railroad Simulator (TRS19 / TRS22) ke liye banaye jane walay Desktop Client Launcher ka mukammal technical naqsha pesh karta hai. Isme software workflow, hardware locking (HWID), encryption, Trainz Content Manager direct injection, aur 3 core developers (Waqas Rasool, Asif Khan, Usman Mani) ke liye zero-restriction Master Bypass ka detail shamil hai.
+            </p>
+
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <span class="label">Project:</span>
+                    <span class="val">TRS DEP PAK (Pak Trainz)</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">Architecture Phase:</span>
+                    <span class="val">Phase 3 (Client App &amp; DRM)</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">Target Simulator:</span>
+                    <span class="val">Trainz 2019 / 2022 / TRS+</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">Live Backend:</span>
+                    <span class="val">Vercel &amp; Turso Cloud DB</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 1: EXECUTIVE SUMMARY & COMPARISON -->
+        <div class="section-card">
+            <h2 class="section-title"><span class="num">01</span> Executive Objective &amp; AKTrains Comparison</h2>
+            
+            <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:14px;">
+                Pakistan Railways ke high-quality 3D assets (e.g. HGMU-30, ALU-24, AC Coaches, Power Vans) ko tayar karne me saalon ki mehnat darkar hoti hai. Raw <code>.cdp</code> files ko agar direct download link se diya jaye to log files ko WhatsApp, Telegram ya Google Drive par leak kar dete hain. 
+            </p>
+
+            <div class="highlight-box">
+                <strong>🎯 Primary Goal:</strong> Customer ko aisi Windows desktop app provide karna jo unka khareeda hua model Trainz me 1-click install kar de, baghair iske ke customer ke hath me raw <code>.cdp</code> file aye jise wo aage distribute kar sake.
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:25%;">Feature</th>
+                        <th style="width:35%;">Standard Web Store (Risky)</th>
+                        <th style="width:40%;">TRS DEP PAK Phase 3 Client App</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>File Delivery</strong></td>
+                        <td>Raw <code>.cdp</code> file user ke Downloads folder me jati hai.</td>
+                        <td>App direct memory / encrypted stream se Trainz me inject karti hai. Raw file save nahi hoti.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>License Sharing</strong></td>
+                        <td>Ek user file le kar 10 doston me bant deta hai.</td>
+                        <td><strong>HWID Lock:</strong> License key sirf us bande ke computer motherboard/CPU se lock ho jati hai.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Installation</strong></td>
+                        <td>Manual Drag-and-Drop in Trainz Content Manager.</td>
+                        <td><strong>Automatic 1-Click:</strong> App background me <code>TrainzUtil.exe install</code> run karke model compile kar deti hai.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Updates / Patches</strong></td>
+                        <td>Dobaraha poori file download karni parti hai.</td>
+                        <td>App auto-check karti hai aur latest version foran update kar deti hai.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 2: END-TO-END WORKFLOW DIAGRAM -->
+        <div class="section-card">
+            <h2 class="section-title"><span class="num">02</span> End-to-End Workflow (Start to End Process)</h2>
+            <p style="font-size:0.93rem; color:#cbd5e1; margin-bottom:12px;">
+                Customer ke order place karne se le kar Trainz me engine drive karne tak ka complete safar:
+            </p>
+
+            <div class="flow-container">
+                <div class="flow-step">
+                    <span class="step-badge">Step 1</span>
+                    <h4>Store Order</h4>
+                    <p>Customer pak-trainz.vercel.app par cart checkout karta hai (EasyPaisa/JazzCash). Admin approve karta hai to unique License Key generate hoti hai.</p>
+                </div>
+
+                <div class="flow-step">
+                    <span class="step-badge">Step 2</span>
+                    <h4>Client App Launch</h4>
+                    <p>Customer <code>TRS-DEP-PAK-Launcher.exe</code> open karta hai aur apna Email + License Key enter karta hai.</p>
+                </div>
+
+                <div class="flow-step">
+                    <span class="step-badge">Step 3</span>
+                    <h4>Hardware ID Binding</h4>
+                    <p>App user ke CPU, Motherboard UUID aur Windows Machine GUID ka SHA-256 hash (HWID) bana kar server ko send karti hai.</p>
+                </div>
+
+                <div class="flow-step">
+                    <span class="step-badge">Step 4</span>
+                    <h4>Server Verification</h4>
+                    <p>Server check karta hai: Agar key active hai aur HWID match hai (ya 1st time activation hai) to encrypted temporary install token bhejta hai.</p>
+                </div>
+
+                <div class="flow-step">
+                    <span class="step-badge">Step 5</span>
+                    <h4>Trainz Auto-Detect</h4>
+                    <p>App Registry ya standard drives se Trainz 2019 / 2022 ka folder dhoondhti hai jahan <code>TrainzUtil.exe</code> mojood hota hai.</p>
+                </div>
+
+                <div class="flow-step">
+                    <span class="step-badge">Step 6</span>
+                    <h4>Direct Injection</h4>
+                    <p>App secure stream download karke foran <code>TrainzUtil.exe install</code> run karti hai. Trainz model ko database me compile karta hai, aur temp cache delete ho jata hai.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: 3-DEVELOPER VIP MASTER BYPASS -->
+        <div class="section-card">
+            <h2 class="section-title"><span class="num">03</span> 👑 3-Developer VIP Master Bypass (Waqas, Asif &amp; Usman)</h2>
+            
+            <div class="vip-box">
+                <h3>👑 Core Team Unrestricted Access Architecture</h3>
+                <p style="font-size:0.92rem; color:#e2e8f0; line-height:1.6;">
+                    Waqas Rasool (Rawalpindi), Asif Khan (Karachi) aur Usman Mani (Qatar) is project ke founders aur developers hain jo mutaddid computers, laptops aur test benches par kaam karte hain. In teeno par <strong>koi bhi HWID hardware lock ya license restrictions laagu nahi hon gi!</strong>
+                </p>
+            </div>
+
+            <div class="team-grid">
+                <div class="member-card">
+                    <div class="member-name">Waqas Rasool</div>
+                    <div class="member-loc">📍 Rawalpindi, Pakistan</div>
+                    <div class="member-privilege">
+                        ✅ <strong>SUPER ADMIN &amp; MASTER BYPASS:</strong><br>
+                        Home PC, Dev Laptop aur Test Rig par unlimited activations. Tamam CDP assets ka full instant download / install.
+                    </div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-name">Asif Khan / Asif Hussain</div>
+                    <div class="member-loc">📍 Karachi, Pakistan</div>
+                    <div class="member-privilege">
+                        ✅ <strong>CORE 3D MODEL DEVELOPER:</strong><br>
+                        Karachi workstation aur laptops par multi-device activation. New test models direct push/pull karne ki access.
+                    </div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-name">Usman Mani</div>
+                    <div class="member-loc">📍 Qatar (Overseas Dev)</div>
+                    <div class="member-privilege">
+                        ✅ <strong>REMOTE LEAD DEVELOPER:</strong><br>
+                        International IP whitelist, multi-system activation, bypass hardware mismatch checks across Qatar machines.
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin:20px 0 8px 0; color:#fff;">Yeh Master Bypass Client App me kaise kaam karega?</h4>
+            <ol style="padding-left:22px; font-size:0.92rem; color:#cbd5e1; line-height:1.7;">
+                <li><strong>Option A (Developer Mode Toggle):</strong> Client App ke login screen par ek switch hoga: <em>"👑 Developer Login"</em>. Jab aap teenon me se koi apna Admin credentials enter karega, app direct <strong>"Master Mode"</strong> me chali jayegi jahan har addon 100% unlocked hoga, baghair kisi license key ke!</li>
+                <li><strong>Option B (Master HWID Whitelist in Admin Studio):</strong> Admin Studio (<code>admin.html</code>) ke andar ek naya tab banega: <strong>"👥 Developer Machines"</strong>. Yahan aap jitne chahein PCs (e.g. <em>"Waqas Pindi Desktop"</em>, <em>"Waqas HP Laptop"</em>, <em>"Asif Karachi PC"</em>, <em>"Usman Qatar Laptop"</em>) ek click se whitelist kar sakein ge. Whitelisted PCs par zero restriction hogi.</li>
+                <li><strong>Option C (Direct Raw CDP Access for Admins):</strong> Admin Portal se sirf aap teenon developers ke pas "Download Raw CDP" ka direct option hamesha active rahay ga taake aap 3ds Max / GMax me editing kar sakein.</li>
+            </ol>
+        </div>
+
+        <!-- SECTION 4: DATA PERSISTENCE & DATABASE SCHEMA -->
+        <div class="section-card">
+            <h2 class="section-title"><span class="num">04</span> Database Schema (Kiya Kiya Data Save Hoga?)</h2>
+            <p style="font-size:0.92rem; color:#cbd5e1; margin-bottom:12px;">
+                Turso Cloud Database me Phase 3 ke liye darj-zail tables aur fields save hongi:
+            </p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Table Name</th>
+                        <th>Important Columns</th>
+                        <th>Purpose &amp; Stored Information</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="code-pill">pak_licenses</span></td>
+                        <td><code>license_key</code>, <code>order_id</code>, <code>customer_email</code>, <code>product_id</code>, <code>hwid_lock</code>, <code>activation_count</code>, <code>is_active</code></td>
+                        <td>Customer ka license record. Pehli activation par customer ke PC ka HWID yahan permanently lock ho jata hai.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">pak_dev_devices</span></td>
+                        <td><code>device_name</code>, <code>developer_name</code>, <code>hwid</code>, <code>city_country</code>, <code>is_whitelisted</code></td>
+                        <td>Waqas, Asif, aur Usman ke authorized PCs ka record (Pindi, Karachi, Qatar) jo hardware lock ko bypass karta hai.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">pak_client_telemetry</span></td>
+                        <td><code>license_key</code>, <code>trainz_version</code>, <code>installed_at</code>, <code>ip_address</code>, <code>status</code></td>
+                        <td>Log tracking: kaunsa customer kab aur kis Trainz version (TRS19 ya TRS22) me addon install kar raha hai.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">pak_settings</span></td>
+                        <td><code>setting_key</code>, <code>setting_value</code></td>
+                        <td>Store payment accounts, WhatsApp number, DRM encryption salt, aur client app version info.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 5: HOW DIRECT INJECTION WORKS WITHOUT LEAKAGE -->
+        <div class="section-card">
+            <h2 class="section-title"><span class="num">05</span> Zero-Leakage Trainz Direct Injection Protocol</h2>
+            
+            <p style="font-size:0.92rem; color:#cbd5e1; margin-bottom:14px;">
+                Trainz Simulator me addon install karne ka standard tariqa <strong>TrainzUtil</strong> utility hai. Hamara Client App is tariqay se file inject karega taake customer usay churra na sake:
+            </p>
+
+            <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:18px; font-family:monospace; font-size:0.85rem; color:#a5b4fc; line-height:1.7;">
+                // 1. Client App requests secure temporary chunk from server<br>
+                const stream = await fetchDecryptedPayload(token, hwid);<br><br>
+                // 2. Stream is piped into a hidden temporary pipe or locked Windows Temp file<br>
+                const tempPath = "C:\\Users\\AppData\\Local\\Temp\\~trs_pkg_temp.tmp";<br><br>
+                // 3. Client App silently triggers TrainzUtil to compile into Trainz internal database<br>
+                exec(`"${trainzPath}\\bin\\TrainzUtil.exe" install "${tempPath}"`);<br><br>
+                // 4. Secure instant wipe (Zero file remains on disk)<br>
+                fs.unlinkSync(tempPath);<br>
+                // Result: Locomotive is now playable inside Trainz, but no .cdp file exists on user's hard drive!
+            </div>
+
+            <div class="highlight-box" style="margin-top:16px;">
+                <strong>💡 Faida:</strong> Trainz Content Manager jab CDP ko install karta hai, to wo use apne binary format (<code>.tzarc</code> database) me convert kar deta hai. Is bina par aam user Trainz ke andar se engine extract karke kisi ko send nahi kar sakta!
+            </div>
+        </div>
+
+        <!-- SECTION 6: IMPLEMENTATION ROADMAP -->
+        <div class="section-card">
+            <h2 class="section-title"><span class="num">06</span> Implementation Roadmap &amp; Execution Steps</h2>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Phase Step</th>
+                        <th>Milestone / Task</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Step 3.1</strong></td>
+                        <td><strong>Architectural Blueprint &amp; Specs:</strong> Documenting the entire system and developer bypass.</td>
+                        <td><span style="color:#4ade80; font-weight:bold;">✅ COMPLETE</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Step 3.2</strong></td>
+                        <td><strong>Admin Studio Master Bypass:</strong> Add "Developer Machines" management tab in <code>admin.html</code> for Waqas, Asif &amp; Usman.</td>
+                        <td><span style="color:#38bdf8; font-weight:bold;">⏳ NEXT</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Step 3.3</strong></td>
+                        <td><strong>Client App Core (Electron Desktop):</strong> Beautiful Trainz-themed UI, HWID generator, Trainz folder detection.</td>
+                        <td><span style="color:#f59e0b; font-weight:bold;">PENDING</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Step 3.4</strong></td>
+                        <td><strong>Injection &amp; DRM Testing:</strong> Live testing with actual Trainz Content Manager and test license key.</td>
+                        <td><span style="color:#f59e0b; font-weight:bold;">PENDING</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Step 3.5</strong></td>
+                        <td><strong>Packaged Windows .EXE:</strong> Compile portable / installer <code>.exe</code> for customers to download from website.</td>
+                        <td><span style="color:#f59e0b; font-weight:bold;">PENDING</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem; border-top:1px solid var(--border); margin-top:20px;">
+            &copy; 2026 Pak Trainz Developers &mdash; Waqas Rasool (Rawalpindi) &bull; Asif Khan (Karachi) &bull; Usman Mani (Qatar). All Rights Reserved.
+        </div>
+
+    </div>
+
+</body>
+</html>

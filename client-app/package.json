@@ -1,0 +1,14 @@
+{
+  "name": "trs-dep-pak-launcher",
+  "version": "1.0.0",
+  "description": "TRS DEP PAK Official Trainz Railroad Simulator Addons Launcher & DRM Client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Pak Trainz Developers (Waqas Rasool, Asif Khan, Usman Mani)",
+  "license": "Proprietary",
+  "dependencies": {
+    "electron": "^33.2.0"
+  }
+}
