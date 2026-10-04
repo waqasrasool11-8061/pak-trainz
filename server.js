@@ -449,10 +449,10 @@ app.get("/api/admin/creators", requireAdmin, async (req, res) => {
 // Add New External Partner / Creator
 app.post("/api/admin/creators", requireAdmin, async (req, res) => {
   try {
-    const { name, role, type, whatsapp, share_pct } = req.body;
+    const { name, role, type, whatsapp, share_pct, username, password } = req.body;
     if (!name) return res.status(400).json({ error: "Partner name is required" });
-    const id = await db.addCreator({ name, role, type, whatsapp, share_pct });
-    res.json({ success: true, id, message: "Partner added successfully" });
+    const result = await db.addCreator({ name, role, type, whatsapp, share_pct, username, password });
+    res.json({ success: true, ...result, message: "Partner and login account added successfully" });
   } catch (err) {
     console.error("Error adding creator:", err);
     res.status(500).json({ error: "Failed to add partner" });

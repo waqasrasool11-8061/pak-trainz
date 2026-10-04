@@ -434,11 +434,18 @@
                                 <span class="e-label">Per Core Share (Waqas/Asif/Usman 1/3)</span>
                             </div>
                         </div>
+                        <div class="earnings-card" style="border-color: rgba(234, 179, 8, 0.35);">
+                            <div class="e-icon">💼</div>
+                            <div>
+                                <span class="e-val" id="earnAdminCommission" style="color:#eab308;">Rs. 0</span>
+                                <span class="e-label">Platform Fee (30% Admin Cut)</span>
+                            </div>
+                        </div>
                         <div class="earnings-card" style="border-color: rgba(168, 85, 247, 0.35);">
                             <div class="e-icon">👤</div>
                             <div>
                                 <span class="e-val" id="earnSoloPool" style="color:#c084fc;">Rs. 0</span>
-                                <span class="e-label">External / Solo Creator Pool</span>
+                                <span class="e-label">External Creators (70% Cut)</span>
                             </div>
                         </div>
                     </div>
@@ -446,9 +453,9 @@
                     <!-- Split Panel: Creators Table + Add Creator Form -->
                     <div class="admin-panel-split" style="margin-bottom: 24px;">
                         <!-- Left Panel: Creators Table -->
-                        <div class="admin-list-panel" style="flex:1.6;">
+                        <div class="admin-list-panel" style="flex:1.7;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <h4 style="margin:0; color:#fff;">Registered Creators &amp; Balances</h4>
+                                <h4 style="margin:0; color:#fff;">Registered Partners, Logins &amp; Balances</h4>
                                 <span style="font-size:0.8rem; color:#94a3b8;">Total Partners: <strong id="creatorsCountSpan">0</strong></span>
                             </div>
                             <div class="table-responsive">
@@ -456,7 +463,9 @@
                                     <thead>
                                         <tr>
                                             <th>Partner / Creator</th>
+                                            <th>Login Username</th>
                                             <th>Type &amp; Role</th>
+                                            <th>Revenue Share</th>
                                             <th>WhatsApp</th>
                                             <th>Solo Sales</th>
                                             <th>Total Balance</th>
@@ -464,7 +473,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="creatorsTableBody">
-                                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Loading team balances...</td></tr>
+                                        <tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">Loading team balances...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -472,8 +481,8 @@
 
                         <!-- Right Panel: Add Partner Form -->
                         <div class="admin-form-panel" style="flex:1;">
-                            <h4 style="margin:0 0 6px 0; color:#fff;">➕ Add New Partner / Creator</h4>
-                            <p class="panel-desc">Future modeler ya joiner (e.g. Ali) ko add karein taake unke banaye hue models ki earning alag calculate ho sake.</p>
+                            <h4 style="margin:0 0 6px 0; color:#fff;">➕ Add New Partner &amp; Login</h4>
+                            <p class="panel-desc">Naye partner ya 3D artist (e.g. Ali) ko add karein. Unka login account auto-create hoga aur unke models par <strong>70% creator / 30% admin</strong> split apply hoga.</p>
 
                             <form id="addCreatorForm" onsubmit="handleAddCreator(event)">
                                 <div class="form-group">
@@ -484,12 +493,29 @@
                                     <label>Role / Specialization *</label>
                                     <input type="text" id="creatorRoleInput" required placeholder="e.g. 3D Locomotive Modeler / Route Builder">
                                 </div>
-                                <div class="form-group">
-                                    <label>Partner Type *</label>
-                                    <select id="creatorTypeInput" required>
-                                        <option value="external">👤 External Partner (Personal 100% solo models)</option>
-                                        <option value="core">👑 Core Team Member (Splits shared pool equally)</option>
-                                    </select>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Partner Type *</label>
+                                        <select id="creatorTypeInput" required onchange="onCreatorTypeFormChanged()">
+                                            <option value="external">👤 External Partner (70% Creator / 30% Admin)</option>
+                                            <option value="core">👑 Core Team Member (Equal 3-Way Split)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Creator Share %</label>
+                                        <input type="number" id="creatorSharePctInput" value="70" min="1" max="100" placeholder="70">
+                                        <small style="color:#94a3b8; font-size:0.75rem;">Default 70% Creator / 30% Admin Cut</small>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Login Username</label>
+                                        <input type="text" id="creatorUsernameInput" placeholder="e.g. ali (Optional, auto-generated)">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Login Password</label>
+                                        <input type="text" id="creatorPasswordInput" placeholder="e.g. ali123 (Default: username123)">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label>WhatsApp Number (for sales notifications)</label>
@@ -497,7 +523,7 @@
                                 </div>
                                 <div id="addCreatorAlert" style="display:none; padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem;"></div>
                                 <button type="submit" id="btnAddCreatorBtn" class="btn primary" style="width:100%; padding:10px;">
-                                    ➕ Save Partner to System
+                                    ➕ Save Partner &amp; Create Login
                                 </button>
                             </form>
                         </div>
@@ -514,11 +540,13 @@
                                        <th>Creator Attribution</th>
                                        <th>Revenue Distribution</th>
                                        <th>Units Sold</th>
-                                       <th>Total Revenue Generated</th>
+                                       <th>Total Revenue</th>
+                                       <th>Creator Share</th>
+                                       <th>Platform Fee (Admin)</th>
                                    </tr>
                                </thead>
                                <tbody id="prodSalesTableBody">
-                                   <tr><td colspan="5" style="text-align:center; padding:16px; color:#94a3b8;">No products sold yet.</td></tr>
+                                   <tr><td colspan="7" style="text-align:center; padding:16px; color:#94a3b8;">No products sold yet.</td></tr>
                                </tbody>
                             </table>
                         </div>
@@ -1617,6 +1645,14 @@
             }
         }
 
+        function onCreatorTypeFormChanged() {
+            const type = document.getElementById('creatorTypeInput').value;
+            const shareInput = document.getElementById('creatorSharePctInput');
+            if (shareInput) {
+                shareInput.value = type === 'core' ? '33' : '70';
+            }
+        }
+
         async function loadTeamEarnings() {
             try {
                 const res = await fetch('/api/admin/team-earnings');
@@ -1626,14 +1662,14 @@
                     const elTotalRev = document.getElementById('earnTotalRev');
                     const elSharedPool = document.getElementById('earnSharedPool');
                     const elPerCore = document.getElementById('earnPerCore');
+                    const elAdminCut = document.getElementById('earnAdminCommission');
                     const elSoloPool = document.getElementById('earnSoloPool');
 
                     if (elTotalRev) elTotalRev.textContent = `Rs. ${(e.totalRevenue || 0).toLocaleString()}`;
                     if (elSharedPool) elSharedPool.textContent = `Rs. ${(e.sharedPool || 0).toLocaleString()}`;
                     if (elPerCore) elPerCore.textContent = `Rs. ${(e.perCoreShare || 0).toLocaleString()}`;
-
-                    const soloPool = Math.max(0, (e.totalRevenue || 0) - (e.sharedPool || 0));
-                    if (elSoloPool) elSoloPool.textContent = `Rs. ${soloPool.toLocaleString()}`;
+                    if (elAdminCut) elAdminCut.textContent = `Rs. ${(e.adminCommission || 0).toLocaleString()}`;
+                    if (elSoloPool) elSoloPool.textContent = `Rs. ${(e.externalEarnings || 0).toLocaleString()}`;
 
                     const countSpan = document.getElementById('creatorsCountSpan');
                     if (countSpan) countSpan.textContent = (e.creators || []).length;
@@ -1642,7 +1678,7 @@
                     const tbody = document.getElementById('creatorsTableBody');
                     if (tbody) {
                         if (!e.creators || !e.creators.length) {
-                            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No creators registered yet.</td></tr>';
+                            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">No creators registered yet.</td></tr>';
                         } else {
                             tbody.innerHTML = e.creators.map(c => {
                                 const isCore = c.type === 'core';
@@ -1653,13 +1689,23 @@
                                     ? `<span style="font-size:0.75rem; color:#94a3b8;">Permanent</span>` 
                                     : `<button class="btn secondary" style="padding:2px 8px; font-size:0.75rem; background:rgba(239,68,68,0.2); color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="handleDeleteCreator(${c.id})">🗑️ Delete</button>`;
 
+                                const shareDesc = isCore 
+                                    ? `<span style="font-size:0.78rem; color:#38bdf8;">Equal 1/3 Shared</span>` 
+                                    : `<span style="font-size:0.78rem; color:#f59e0b;">${c.share_pct || 70}% Creator / ${(100 - (c.share_pct || 70))}% Admin</span>`;
+
+                                const isWaqas = c.name.toLowerCase().includes('waqas') || (c.role && c.role.toLowerCase().includes('super admin'));
+
                                 return `
                                     <tr>
                                         <td>
                                             <strong style="color:#fff;">${escapeHtml(c.name)}</strong>
                                             ${c.role ? `<div style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(c.role)}</div>` : ''}
                                         </td>
+                                        <td>
+                                            <code style="color:#38bdf8; background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:4px; font-size:0.8rem;">${escapeHtml(c.username || 'admin')}</code>
+                                        </td>
                                         <td>${badge}</td>
+                                        <td>${shareDesc}</td>
                                         <td>
                                             ${c.whatsapp 
                                                 ? `<a href="https://wa.me/${escapeHtml(c.whatsapp.replace(/[^0-9]/g, ''))}" target="_blank" style="color:#4ade80; text-decoration:none; font-size:0.8rem;">💬 ${escapeHtml(c.whatsapp)}</a>` 
@@ -1673,6 +1719,7 @@
                                         <td>
                                             <strong style="color:#34d399; font-size:0.95rem;">Rs. ${(c.total_earnings || 0).toLocaleString()}</strong>
                                             ${isCore ? `<div style="font-size:0.72rem; color:#94a3b8;">(Shared: Rs. ${(c.shared_earnings || 0).toLocaleString()})</div>` : ''}
+                                            ${(isWaqas && c.admin_commission) ? `<div style="font-size:0.72rem; color:#eab308;">(+ Rs. ${(c.admin_commission).toLocaleString()} 30% Platform Cut)</div>` : ''}
                                         </td>
                                         <td>${deleteBtn}</td>
                                     </tr>
@@ -1685,7 +1732,7 @@
                     const salesTbody = document.getElementById('prodSalesTableBody');
                     if (salesTbody) {
                         if (!e.productSales || !e.productSales.length) {
-                            salesTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px; color:#94a3b8;">No products sold yet.</td></tr>';
+                            salesTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:#94a3b8;">No products sold yet.</td></tr>';
                         } else {
                             salesTbody.innerHTML = e.productSales.map(ps => `
                                 <tr>
@@ -1693,12 +1740,14 @@
                                     <td><span style="color:#38bdf8;">${escapeHtml(ps.creator)}</span></td>
                                     <td>
                                         ${ps.type === 'solo' 
-                                            ? `<span class="creator-tag creator-external">100% Solo to Creator</span>` 
-                                            : `<span class="creator-tag creator-core">3-Way Split (Waqas/Asif/Usman)</span>`
+                                            ? `<span class="creator-tag creator-external">70% Creator / 30% Admin</span>` 
+                                            : `<span class="creator-tag creator-core">3-Way Equal Split</span>`
                                         }
                                     </td>
                                     <td><span class="count-pill">🛒 ${ps.sales}</span></td>
                                     <td><strong style="color:#4ade80;">Rs. ${ps.revenue.toLocaleString()}</strong></td>
+                                    <td><span style="color:#c084fc;">Rs. ${(ps.creator_cut || (ps.type === 'solo' ? ps.revenue : 0)).toLocaleString()}</span></td>
+                                    <td><span style="color:#eab308;">Rs. ${(ps.admin_cut || 0).toLocaleString()}</span></td>
                                 </tr>
                             `).join('');
                         }
@@ -1719,11 +1768,14 @@
                 name: document.getElementById('creatorNameInput').value.trim(),
                 role: document.getElementById('creatorRoleInput').value.trim(),
                 type: document.getElementById('creatorTypeInput').value,
+                share_pct: Number(document.getElementById('creatorSharePctInput').value) || 70,
+                username: document.getElementById('creatorUsernameInput').value.trim(),
+                password: document.getElementById('creatorPasswordInput').value.trim(),
                 whatsapp: document.getElementById('creatorWhatsappInput').value.trim()
             };
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
+            submitBtn.textContent = 'Saving & creating login...';
 
             try {
                 const res = await fetch('/api/admin/creators', {
@@ -1736,7 +1788,7 @@
                     alertBox.style.display = 'block';
                     alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
                     alertBox.style.color = '#86efac';
-                    alertBox.textContent = 'Partner added successfully!';
+                    alertBox.textContent = `✅ Partner '${payload.name}' added! Login: '${data.username || payload.username}', Password: '${data.password || 'set'}'.`;
                     document.getElementById('addCreatorForm').reset();
                     loadCreatorsForSelect();
                     loadTeamEarnings();
@@ -1753,7 +1805,7 @@
                 alertBox.textContent = 'Server connection error';
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = '➕ Save Partner to System';
+                submitBtn.textContent = '➕ Save Partner & Create Login';
             }
         }
 

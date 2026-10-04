@@ -274,21 +274,39 @@ async function initDatabase() {
   try {
     await db.execute("ALTER TABLE pak_products ADD COLUMN creator_whatsapp TEXT DEFAULT ''");
   } catch (e) {}
-
-  // Seed default admin if empty
   try {
-    const adminRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_admins");
-    const adminCount = Number(adminRes.rows[0]?.cnt ?? adminRes.rows[0]?.[0] ?? 0);
-    if (adminCount === 0) {
-      const defaultHash = bcrypt.hashSync("trainz123", 10);
-      await db.execute({
-        sql: "INSERT INTO pak_admins (username, password_hash, role) VALUES (?, ?, ?)",
-        args: ["admin", defaultHash, "admin"]
+    await db.execute("ALTER TABLE pak_creators ADD COLUMN username TEXT DEFAULT ''");
+  } catch (e) {}
+
+  // Seed default core team admin accounts if missing (Waqas, Asif, Usman)
+  try {
+    const seedAdmins = [
+      { username: "admin", pass: "trainz123", role: "superadmin" },
+      { username: "waqas", pass: "waqas123", role: "superadmin" },
+      { username: "asif", pass: "asif123", role: "admin" },
+      { username: "usman", pass: "usman123", role: "admin" }
+    ];
+    for (const a of seedAdmins) {
+      const exists = await db.execute({
+        sql: "SELECT id FROM pak_admins WHERE LOWER(username) = LOWER(?)",
+        args: [a.username]
       });
-      console.log("[db] Initialized default admin: admin / trainz123");
+      if (!exists.rows.length) {
+        const hash = bcrypt.hashSync(a.pass, 10);
+        await db.execute({
+          sql: "INSERT INTO pak_admins (username, password_hash, role) VALUES (?, ?, ?)",
+          args: [a.username, hash, a.role]
+        });
+        console.log(`[db] Initialized team login: ${a.username} / ${a.pass}`);
+      }
     }
+
+    // Attach usernames to core creators in pak_creators
+    await db.execute("UPDATE pak_creators SET username = 'admin' WHERE LOWER(name) LIKE '%waqas%' AND (username IS NULL OR username = '')");
+    await db.execute("UPDATE pak_creators SET username = 'asif' WHERE LOWER(name) LIKE '%asif%' AND (username IS NULL OR username = '')");
+    await db.execute("UPDATE pak_creators SET username = 'usman' WHERE LOWER(name) LIKE '%usman%' AND (username IS NULL OR username = '')");
   } catch (err) {
-    console.error("[db] Error checking/seeding admin:", err.message);
+    console.error("[db] Error checking/seeding team admins:", err.message);
   }
 
   // Seed products if empty
@@ -1189,8 +1207,9 @@ async function getCreators() {
     name: String(c.name),
     role: String(c.role || "Developer"),
     type: String(c.type || "core"),
+    username: String(c.username || ""),
     whatsapp: String(c.whatsapp || ""),
-    share_pct: Number(c.share_pct || 33.33),
+    share_pct: Number(c.share_pct || (c.type === 'core' ? 33.33 : 70)),
     is_active: Number(c.is_active ?? 1),
     created_at: String(c.created_at || "")
   }));
@@ -1198,15 +1217,48 @@ async function getCreators() {
 
 async function addCreator(data) {
   const db = getClient();
+  const rawUsername = (data.username || data.name.trim().toLowerCase().split(' ')[0] || "creator").replace(/[^a-zA-Z0-9_]/g, '');
+  const username = rawUsername || `creator_${Date.now()}`;
+  const password = data.password ? data.password.trim() : `${username}123`;
+  const sharePct = Number(data.share_pct) || (data.type === 'core' ? 33.33 : 70);
+
+  // 1. Insert into pak_creators
   const res = await db.execute({
-    sql: "INSERT INTO pak_creators (name, role, type, whatsapp, share_pct, is_active) VALUES (?, ?, ?, ?, ?, 1)",
-    args: [data.name, data.role || "External Partner", data.type || "external", data.whatsapp || "", Number(data.share_pct) || 0]
+    sql: "INSERT INTO pak_creators (name, role, type, whatsapp, share_pct, username, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)",
+    args: [data.name, data.role || "External Partner", data.type || "external", data.whatsapp || "", sharePct, username]
   });
-  return res.lastInsertRowid;
+
+  // 2. Automatically create login account in pak_admins
+  try {
+    const existingAdmin = await db.execute({
+      sql: "SELECT id FROM pak_admins WHERE LOWER(username) = LOWER(?)",
+      args: [username]
+    });
+    if (!existingAdmin.rows.length) {
+      const hash = bcrypt.hashSync(password, 10);
+      await db.execute({
+        sql: "INSERT INTO pak_admins (username, password_hash, role) VALUES (?, ?, ?)",
+        args: [username, hash, data.type === 'core' ? 'admin' : 'creator']
+      });
+      console.log(`[db] Auto-created login account for partner: ${username} / ${password}`);
+    }
+  } catch (err) {
+    console.error("[db] Error creating admin login for partner:", err.message);
+  }
+
+  return { id: res.lastInsertRowid, username, password, share_pct: sharePct };
 }
 
 async function deleteCreator(id) {
   const db = getClient();
+  try {
+    const cRes = await db.execute({ sql: "SELECT username, type FROM pak_creators WHERE id = ?", args: [id] });
+    if (cRes.rows.length && cRes.rows[0].username && cRes.rows[0].type !== 'core') {
+      const u = String(cRes.rows[0].username);
+      await db.execute({ sql: "DELETE FROM pak_admins WHERE LOWER(username) = LOWER(?) AND role = 'creator'", args: [u] });
+    }
+  } catch (e) {}
+
   await db.execute({
     sql: "DELETE FROM pak_creators WHERE id = ?",
     args: [id]
@@ -1223,10 +1275,12 @@ async function getTeamEarnings() {
     name: String(c.name),
     role: String(c.role || "Developer"),
     type: String(c.type || 'core'),
+    username: String(c.username || ''),
     whatsapp: String(c.whatsapp || ''),
-    share_pct: Number(c.share_pct || 33.33),
+    share_pct: Number(c.share_pct || (c.type === 'core' ? 33.33 : 70)),
     shared_earnings: 0,
     solo_earnings: 0,
+    admin_commission: 0,
     total_earnings: 0,
     sales_count: 0
   }));
@@ -1242,6 +1296,8 @@ async function getTeamEarnings() {
 
   let totalStoreRevenue = 0;
   let sharedPool = 0;
+  let totalAdminCommission = 0;
+  let totalExternalEarnings = 0;
   const productStats = {};
 
   for (const item of itemsRes.rows) {
@@ -1253,15 +1309,34 @@ async function getTeamEarnings() {
     totalStoreRevenue += price;
 
     if (!productStats[prodTitle]) {
-      productStats[prodTitle] = { title: prodTitle, sales: 0, revenue: 0, creator: creatorName, type: revType };
+      productStats[prodTitle] = { 
+        title: prodTitle, 
+        sales: 0, 
+        revenue: 0, 
+        creator: creatorName, 
+        type: revType,
+        creator_cut: 0,
+        admin_cut: 0 
+      };
     }
     productStats[prodTitle].sales += 1;
     productStats[prodTitle].revenue += price;
 
     if (revType === 'solo') {
       const found = creators.find(c => c.name.toLowerCase() === creatorName.toLowerCase());
+      // External creator gets their share_pct (default 70%), Main Admin gets remainder (default 30%)
+      const creatorPct = found ? (Number(found.share_pct) || 70) : 70;
+      const creatorCut = Math.round(price * (creatorPct / 100));
+      const adminCut = price - creatorCut;
+
+      totalAdminCommission += adminCut;
+      totalExternalEarnings += creatorCut;
+
+      productStats[prodTitle].creator_cut += creatorCut;
+      productStats[prodTitle].admin_cut += adminCut;
+
       if (found) {
-        found.solo_earnings += price;
+        found.solo_earnings += creatorCut;
         found.sales_count += 1;
       }
     } else {
@@ -1269,22 +1344,28 @@ async function getTeamEarnings() {
     }
   }
 
-  // Split shared pool equally among core members
+  // Split shared pool equally among core members (Waqas, Asif, Usman)
   const coreCreators = creators.filter(c => c.type === 'core');
   const coreCount = coreCreators.length || 3;
-  const perCoreShare = sharedPool / coreCount;
+  const perCoreShare = Math.round(sharedPool / coreCount);
 
   for (const c of creators) {
     if (c.type === 'core') {
-      c.shared_earnings = Math.round(perCoreShare);
+      c.shared_earnings = perCoreShare;
+      // Main Admin (Waqas) gets the 30% platform fee from all external creator sales!
+      if (c.name.toLowerCase().includes('waqas') || c.role.toLowerCase().includes('super admin')) {
+        c.admin_commission = totalAdminCommission;
+      }
     }
-    c.total_earnings = c.shared_earnings + c.solo_earnings;
+    c.total_earnings = c.shared_earnings + c.solo_earnings + (c.admin_commission || 0);
   }
 
   return {
     totalRevenue: totalStoreRevenue,
     sharedPool: Math.round(sharedPool),
-    perCoreShare: Math.round(perCoreShare),
+    perCoreShare: perCoreShare,
+    adminCommission: totalAdminCommission,
+    externalEarnings: totalExternalEarnings,
     creators,
     productSales: Object.values(productStats)
   };
