@@ -228,6 +228,53 @@ async function initDatabase() {
     console.error("[db] Error seeding developer devices:", err.message);
   }
 
+  // Partners & Creators Table (Waqas, Asif, Usman + Dynamic External Partners)
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS pak_creators (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      role TEXT DEFAULT 'Developer',
+      type TEXT DEFAULT 'core',
+      whatsapp TEXT,
+      share_pct REAL DEFAULT 33.33,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Seed default core team partners if empty
+  try {
+    const creatRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_creators");
+    const creatCount = Number(creatRes.rows[0]?.cnt ?? creatRes.rows[0]?.[0] ?? 0);
+    if (creatCount === 0) {
+      const defaultCreators = [
+        { name: "Waqas Rasool", role: "Super Admin & Developer", type: "core", whatsapp: "923001234567", share_pct: 33.33 },
+        { name: "Asif Khan", role: "Core 3D Locomotive Designer", type: "core", whatsapp: "923001234567", share_pct: 33.33 },
+        { name: "Usman Mani", role: "Overseas Lead Developer", type: "core", whatsapp: "923001234567", share_pct: 33.33 }
+      ];
+      for (const c of defaultCreators) {
+        await db.execute({
+          sql: "INSERT INTO pak_creators (name, role, type, whatsapp, share_pct, is_active) VALUES (?, ?, ?, ?, ?, 1)",
+          args: [c.name, c.role, c.type, c.whatsapp, c.share_pct]
+        });
+      }
+      console.log("[db] Initialized 3 core creators in pak_creators");
+    }
+  } catch (err) {
+    console.error("[db] Error seeding creators:", err.message);
+  }
+
+  // Ensure new columns exist on pak_products for Creator Attribution & Revenue Split
+  try {
+    await db.execute("ALTER TABLE pak_products ADD COLUMN revenue_type TEXT DEFAULT 'shared'");
+  } catch (e) {}
+  try {
+    await db.execute("ALTER TABLE pak_products ADD COLUMN creator_name TEXT DEFAULT 'Core Team (Shared)'");
+  } catch (e) {}
+  try {
+    await db.execute("ALTER TABLE pak_products ADD COLUMN creator_whatsapp TEXT DEFAULT ''");
+  } catch (e) {}
+
   // Seed default admin if empty
   try {
     const adminRes = await db.execute("SELECT COUNT(*) as cnt FROM pak_admins");
@@ -545,6 +592,9 @@ async function getProducts(filter = {}) {
     description: String(r.description || ""),
     kuid_info: String(r.kuid_info || ""),
     badge: String(r.badge || ""),
+    revenue_type: String(r.revenue_type || "shared"),
+    creator_name: String(r.creator_name || "Core Team (Shared)"),
+    creator_whatsapp: String(r.creator_whatsapp || ""),
     download_count: Number(r.download_count || 0),
     created_at: String(r.created_at || "")
   }));
@@ -573,6 +623,9 @@ async function getProductById(id) {
     description: String(r.description || ""),
     kuid_info: String(r.kuid_info || ""),
     badge: String(r.badge || ""),
+    revenue_type: String(r.revenue_type || "shared"),
+    creator_name: String(r.creator_name || "Core Team (Shared)"),
+    creator_whatsapp: String(r.creator_whatsapp || ""),
     download_count: Number(r.download_count || 0)
   };
 }
@@ -581,8 +634,9 @@ async function addProduct(data) {
   const db = getClient();
   const res = await db.execute({
     sql: `INSERT INTO pak_products (
-      title, category, price, sale_price, currency, is_free, image_url, file_url, file_size, version, description, kuid_info, badge
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      title, category, price, sale_price, currency, is_free, image_url, file_url,
+      file_size, version, description, kuid_info, badge, revenue_type, creator_name, creator_whatsapp
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       data.title,
       data.category || "Locomotives",
@@ -596,7 +650,10 @@ async function addProduct(data) {
       data.version || "TRS19 / TRS22",
       data.description || "",
       data.kuid_info || "",
-      data.badge || ""
+      data.badge || "",
+      data.revenue_type || "shared",
+      data.creator_name || "Core Team (Shared)",
+      data.creator_whatsapp || ""
     ]
   });
   return res.lastInsertRowid;
@@ -616,7 +673,10 @@ async function updateProduct(id, data) {
       file_url = ?,
       image_url = ?,
       kuid_info = ?,
-      description = ?
+      description = ?,
+      revenue_type = ?,
+      creator_name = ?,
+      creator_whatsapp = ?
     WHERE id = ?`,
     args: [
       data.title,
@@ -630,6 +690,9 @@ async function updateProduct(id, data) {
       data.image_url || "Pictures & Videos/1.png",
       data.kuid_info || "",
       data.description || "",
+      data.revenue_type || "shared",
+      data.creator_name || "Core Team (Shared)",
+      data.creator_whatsapp || "",
       id
     ]
   });
@@ -787,6 +850,10 @@ async function getAllOrders() {
       sql: "SELECT * FROM pak_order_items WHERE order_id = ?",
       args: [o.id]
     });
+    const licRes = await db.execute({
+      sql: "SELECT id, license_key, product_id, product_title, hwid_lock, is_active FROM pak_licenses WHERE order_id = ?",
+      args: [o.id]
+    });
     orders.push({
       id: Number(o.id),
       order_number: String(o.order_number),
@@ -801,7 +868,15 @@ async function getAllOrders() {
       admin_notes: String(o.admin_notes || ""),
       created_at: String(o.created_at),
       items_count: itemsRes.rows.length,
-      items: itemsRes.rows.map(i => String(i.product_title))
+      items: itemsRes.rows.map(i => String(i.product_title)),
+      licenses: licRes.rows.map(l => ({
+        id: Number(l.id),
+        license_key: String(l.license_key),
+        product_id: Number(l.product_id),
+        product_title: String(l.product_title),
+        hwid_lock: l.hwid_lock ? String(l.hwid_lock) : null,
+        is_active: Number(l.is_active)
+      }))
     });
   }
 
@@ -1090,6 +1165,132 @@ async function getStoreStats() {
 }
 
 // ──────────────────────────────────────────
+// LICENSE PC RESET & DEVICE TRANSFER
+// ──────────────────────────────────────────
+
+async function resetLicenseHWID(licenseId) {
+  const db = getClient();
+  await db.execute({
+    sql: "UPDATE pak_licenses SET hwid_lock = NULL WHERE id = ?",
+    args: [licenseId]
+  });
+  return { success: true, message: "PC license lock reset. Customer can now bind to their new PC." };
+}
+
+// ──────────────────────────────────────────
+// TEAM EARNINGS & CREATOR ATTRIBUTION METHODS
+// ──────────────────────────────────────────
+
+async function getCreators() {
+  const db = getClient();
+  const res = await db.execute("SELECT * FROM pak_creators ORDER BY id ASC");
+  return res.rows.map(c => ({
+    id: Number(c.id),
+    name: String(c.name),
+    role: String(c.role || "Developer"),
+    type: String(c.type || "core"),
+    whatsapp: String(c.whatsapp || ""),
+    share_pct: Number(c.share_pct || 33.33),
+    is_active: Number(c.is_active ?? 1),
+    created_at: String(c.created_at || "")
+  }));
+}
+
+async function addCreator(data) {
+  const db = getClient();
+  const res = await db.execute({
+    sql: "INSERT INTO pak_creators (name, role, type, whatsapp, share_pct, is_active) VALUES (?, ?, ?, ?, ?, 1)",
+    args: [data.name, data.role || "External Partner", data.type || "external", data.whatsapp || "", Number(data.share_pct) || 0]
+  });
+  return res.lastInsertRowid;
+}
+
+async function deleteCreator(id) {
+  const db = getClient();
+  await db.execute({
+    sql: "DELETE FROM pak_creators WHERE id = ?",
+    args: [id]
+  });
+}
+
+async function getTeamEarnings() {
+  const db = getClient();
+  
+  // 1. Fetch active creators
+  const creatorsRes = await db.execute("SELECT * FROM pak_creators WHERE is_active = 1 ORDER BY id ASC");
+  const creators = creatorsRes.rows.map(c => ({
+    id: Number(c.id),
+    name: String(c.name),
+    role: String(c.role || "Developer"),
+    type: String(c.type || 'core'),
+    whatsapp: String(c.whatsapp || ''),
+    share_pct: Number(c.share_pct || 33.33),
+    shared_earnings: 0,
+    solo_earnings: 0,
+    total_earnings: 0,
+    sales_count: 0
+  }));
+
+  // 2. Fetch approved order items
+  const itemsRes = await db.execute(`
+    SELECT oi.*, o.order_number, o.created_at, p.revenue_type, p.creator_name, p.creator_whatsapp
+    FROM pak_order_items oi
+    JOIN pak_orders o ON oi.order_id = o.id
+    LEFT JOIN pak_products p ON oi.product_id = p.id
+    WHERE o.status = 'approved'
+  `);
+
+  let totalStoreRevenue = 0;
+  let sharedPool = 0;
+  const productStats = {};
+
+  for (const item of itemsRes.rows) {
+    const price = Number(item.price || 0);
+    const prodTitle = String(item.product_title || 'Locomotive Model');
+    const revType = String(item.revenue_type || 'shared');
+    const creatorName = String(item.creator_name || 'Core Team (Shared)');
+
+    totalStoreRevenue += price;
+
+    if (!productStats[prodTitle]) {
+      productStats[prodTitle] = { title: prodTitle, sales: 0, revenue: 0, creator: creatorName, type: revType };
+    }
+    productStats[prodTitle].sales += 1;
+    productStats[prodTitle].revenue += price;
+
+    if (revType === 'solo') {
+      const found = creators.find(c => c.name.toLowerCase() === creatorName.toLowerCase());
+      if (found) {
+        found.solo_earnings += price;
+        found.sales_count += 1;
+      }
+    } else {
+      sharedPool += price;
+    }
+  }
+
+  // Split shared pool equally among core members
+  const coreCreators = creators.filter(c => c.type === 'core');
+  const coreCount = coreCreators.length || 3;
+  const perCoreShare = sharedPool / coreCount;
+
+  for (const c of creators) {
+    if (c.type === 'core') {
+      c.shared_earnings = Math.round(perCoreShare);
+    }
+    c.total_earnings = c.shared_earnings + c.solo_earnings;
+  }
+
+  return {
+    totalRevenue: totalStoreRevenue,
+    sharedPool: Math.round(sharedPool),
+    perCoreShare: Math.round(perCoreShare),
+    creators,
+    productSales: Object.values(productStats)
+  };
+}
+
+// ──────────────────────────────────────────
 // EXISTING CRUD METHODS (Downloads, Gallery, Videos, Admin)
 // ──────────────────────────────────────────
 
@@ -1260,7 +1461,13 @@ module.exports = {
   rejectOrder,
   verifyAndConsumeDownload,
   verifyClientAppLicense,
+  resetLicenseHWID,
   getStoreStats,
+  getTeamEarnings,
+  // Creators & Partners
+  getCreators,
+  addCreator,
+  deleteCreator,
   // Legacy downloads, gallery, videos & auth
   getDownloads,
   incrementDownloadCount,

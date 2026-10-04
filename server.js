@@ -13,8 +13,8 @@ const SESSION_SECRET = process.env.SESSION_SECRET || "pak_trainz_secret_salt_202
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 app.use(cookieParser(SESSION_SECRET));
 
 // Serve static directory (public folder for Vercel CDN + root)
@@ -348,7 +348,10 @@ app.post("/api/admin/products", requireAdmin, async (req, res) => {
       version: version || "TRS19 / TRS22",
       description: description || "",
       kuid_info: kuid_info || "",
-      badge: badge || ""
+      badge: badge || "",
+      revenue_type: req.body.revenue_type || "shared",
+      creator_name: req.body.creator_name || "Core Team (Shared)",
+      creator_whatsapp: req.body.creator_whatsapp || ""
     });
 
     res.json({ success: true, id: newId, message: "Product created successfully" });
@@ -390,6 +393,107 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   } catch (err) {
     console.error("Delete product error:", err);
     res.status(500).json({ error: "Failed to delete product" });
+  }
+});
+
+// ──────────────────────────────────────────
+// IMAGE UPLOAD API (Upload photo from PC for products)
+// ──────────────────────────────────────────
+
+app.post("/api/admin/upload-image", requireAdmin, (req, res) => {
+  try {
+    const { imageData, fileName } = req.body;
+    if (!imageData) {
+      return res.status(400).json({ error: "No image data provided" });
+    }
+
+    const matches = imageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: "Invalid base64 image data" });
+    }
+
+    const buffer = Buffer.from(matches[2], "base64");
+    const cleanName = `${Date.now()}_${(fileName || "product.png").replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+
+    const uploadDir = path.join(__dirname, "public", "Pictures & Videos", "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filePath = path.join(uploadDir, cleanName);
+    fs.writeFileSync(filePath, buffer);
+
+    const relativeUrl = `Pictures & Videos/uploads/${cleanName}`;
+    res.json({ success: true, imageUrl: relativeUrl, message: "Image uploaded successfully" });
+  } catch (err) {
+    console.error("Image upload error:", err);
+    res.status(500).json({ error: "Failed to upload image" });
+  }
+});
+
+// ──────────────────────────────────────────
+// CREATORS, PARTNERS & TEAM EARNINGS APIS
+// ──────────────────────────────────────────
+
+// Get Creators / Partners
+app.get("/api/admin/creators", requireAdmin, async (req, res) => {
+  try {
+    const creators = await db.getCreators();
+    res.json({ success: true, creators });
+  } catch (err) {
+    console.error("Error fetching creators:", err);
+    res.status(500).json({ error: "Failed to load creators" });
+  }
+});
+
+// Add New External Partner / Creator
+app.post("/api/admin/creators", requireAdmin, async (req, res) => {
+  try {
+    const { name, role, type, whatsapp, share_pct } = req.body;
+    if (!name) return res.status(400).json({ error: "Partner name is required" });
+    const id = await db.addCreator({ name, role, type, whatsapp, share_pct });
+    res.json({ success: true, id, message: "Partner added successfully" });
+  } catch (err) {
+    console.error("Error adding creator:", err);
+    res.status(500).json({ error: "Failed to add partner" });
+  }
+});
+
+// Delete Partner
+app.delete("/api/admin/creators/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await db.deleteCreator(id);
+    res.json({ success: true, message: "Partner removed successfully" });
+  } catch (err) {
+    console.error("Error deleting creator:", err);
+    res.status(500).json({ error: "Failed to delete partner" });
+  }
+});
+
+// Get Team Earnings & Sales Split Breakdown
+app.get("/api/admin/team-earnings", requireAdmin, async (req, res) => {
+  try {
+    const earnings = await db.getTeamEarnings();
+    res.json({ success: true, earnings });
+  } catch (err) {
+    console.error("Error loading team earnings:", err);
+    res.status(500).json({ error: "Failed to load team earnings" });
+  }
+});
+
+// ──────────────────────────────────────────
+// LICENSE PC RESET & DEVICE TRANSFER API
+// ──────────────────────────────────────────
+
+app.post("/api/admin/licenses/:id/reset-hwid", requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const result = await db.resetLicenseHWID(id);
+    res.json(result);
+  } catch (err) {
+    console.error("Reset HWID error:", err);
+    res.status(500).json({ error: "Failed to reset license hardware lock" });
   }
 });
 

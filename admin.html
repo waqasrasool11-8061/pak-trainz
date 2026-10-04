@@ -73,6 +73,74 @@
             align-items: center;
             gap: 8px;
         }
+
+        .img-upload-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px dashed rgba(56, 189, 248, 0.4);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+        }
+        .img-preview-thumb {
+            width: 50px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #091428;
+        }
+        .earnings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .earnings-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .earnings-card .e-icon {
+            font-size: 2rem;
+            line-height: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+        .earnings-card .e-val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            display: block;
+        }
+        .earnings-card .e-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .creator-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .creator-core {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .creator-external {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
     </style>
 </head>
 <body class="admin-body">
@@ -167,6 +235,7 @@
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="switchTab('orders')">🛒 Customer Orders</button>
                 <button class="tab-btn" onclick="switchTab('products')">💎 Store Products</button>
+                <button class="tab-btn" onclick="switchTab('earnings')">💰 Team Earnings &amp; Partners</button>
                 <button class="tab-btn" onclick="switchTab('payment-settings')">💳 Payment Accounts</button>
                 <button class="tab-btn" onclick="switchTab('developer-devices')">👑 Developer PCs (Master Bypass)</button>
                 <button class="tab-btn" onclick="switchTab('downloads')">📥 Downloads (.cdp)</button>
@@ -262,8 +331,35 @@
                                 <input type="text" id="prodFileUrl" required placeholder="Cloudflare R2 link, Google Drive link, or Pictures & Videos/filename.cdp">
                             </div>
                             <div class="form-group">
-                                <label>Product Image URL</label>
-                                <input type="text" id="prodImageUrl" placeholder="Pictures & Videos/1.png">
+                                <label>Product Image (Browse from PC or Image Link) *</label>
+                                <div class="img-upload-box">
+                                    <input type="file" id="prodImageFile" accept="image/*" style="display:none;" onchange="handleImageFileSelected(this, 'prodImageUrl', 'prodImagePreview', 'prodImageFileName')">
+                                    <button type="button" class="btn secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="document.getElementById('prodImageFile').click()">📁 Browse Photo from PC</button>
+                                    <span id="prodImageFileName" style="font-size:0.8rem; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;">No file selected</span>
+                                </div>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <input type="text" id="prodImageUrl" placeholder="Pictures & Videos/1.png" style="flex:1;" oninput="document.getElementById('prodImagePreview').src = this.value || 'Pictures & Videos/1.png'">
+                                    <img id="prodImagePreview" src="Pictures & Videos/1.png" alt="Preview" class="img-preview-thumb" onerror="this.src='Pictures & Videos/1.png'">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Revenue Split Type *</label>
+                                    <select id="prodRevenueType" onchange="onRevenueTypeChanged('add')">
+                                        <option value="shared">🤝 Shared Pool (Equal 3-Way Split: Waqas, Asif, Usman)</option>
+                                        <option value="solo">👤 Solo / External Creator (100% to Creator)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Model Creator / Author *</label>
+                                    <select id="prodCreatorName" onchange="onCreatorSelected('add')">
+                                        <option value="Core Team (Shared)">Core Team (Shared)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" id="prodCreatorWhatsappGroup" style="display:none;">
+                                <label>Creator WhatsApp (Optional for sales alerts)</label>
+                                <input type="text" id="prodCreatorWhatsapp" placeholder="e.g. 923001234567">
                             </div>
                             <div class="form-group">
                                 <label>KUID Info (Optional)</label>
@@ -296,6 +392,134 @@
                                 <tbody id="productsTableBody">
                                     <!-- Populated via JS -->
                                 </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: TEAM EARNINGS & CREATOR PARTNERS -->
+            <div id="tab-earnings" class="admin-tab-pane">
+                <div style="background: rgba(11,23,51,0.85); border: 1px solid rgba(255,255,255,0.12); border-radius:18px; padding:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h3 style="margin:0; color:#fff; font-size:1.3rem;">💰 Team Earnings, Revenue Distribution &amp; Partners</h3>
+                            <p style="margin:6px 0 0 0; color:#94a3b8; font-size:0.88rem; max-width:850px;">
+                                Pakistan Railways Trainz store sales tracking. Core members (Waqas Rasool, Asif Khan, Usman Mani) ka shared models se <strong>33.33% barabar split</strong> banta hai. Naye ya external creators (jaise Ali ya future 3D artists) ko yahan add karke unke personal models ke 100% earnings unke account me track kiye jaate hain.
+                            </p>
+                        </div>
+                        <button class="btn secondary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="loadTeamEarnings()">🔄 Refresh Earnings</button>
+                    </div>
+
+                    <!-- Earnings Summary Cards -->
+                    <div class="earnings-grid">
+                        <div class="earnings-card" style="border-color: rgba(56, 189, 248, 0.35);">
+                            <div class="e-icon">💵</div>
+                            <div>
+                                <span class="e-val" id="earnTotalRev" style="color:#38bdf8;">Rs. 0</span>
+                                <span class="e-label">Total Store Sales</span>
+                            </div>
+                        </div>
+                        <div class="earnings-card" style="border-color: rgba(16, 185, 129, 0.35);">
+                            <div class="e-icon">🤝</div>
+                            <div>
+                                <span class="e-val" id="earnSharedPool" style="color:#34d399;">Rs. 0</span>
+                                <span class="e-label">Shared Models Pool</span>
+                            </div>
+                        </div>
+                        <div class="earnings-card" style="border-color: rgba(245, 158, 11, 0.35);">
+                            <div class="e-icon">👑</div>
+                            <div>
+                                <span class="e-val" id="earnPerCore" style="color:#fbbf24;">Rs. 0</span>
+                                <span class="e-label">Per Core Share (Waqas/Asif/Usman 1/3)</span>
+                            </div>
+                        </div>
+                        <div class="earnings-card" style="border-color: rgba(168, 85, 247, 0.35);">
+                            <div class="e-icon">👤</div>
+                            <div>
+                                <span class="e-val" id="earnSoloPool" style="color:#c084fc;">Rs. 0</span>
+                                <span class="e-label">External / Solo Creator Pool</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Split Panel: Creators Table + Add Creator Form -->
+                    <div class="admin-panel-split" style="margin-bottom: 24px;">
+                        <!-- Left Panel: Creators Table -->
+                        <div class="admin-list-panel" style="flex:1.6;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <h4 style="margin:0; color:#fff;">Registered Creators &amp; Balances</h4>
+                                <span style="font-size:0.8rem; color:#94a3b8;">Total Partners: <strong id="creatorsCountSpan">0</strong></span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Partner / Creator</th>
+                                            <th>Type &amp; Role</th>
+                                            <th>WhatsApp</th>
+                                            <th>Solo Sales</th>
+                                            <th>Total Balance</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="creatorsTableBody">
+                                        <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Loading team balances...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Add Partner Form -->
+                        <div class="admin-form-panel" style="flex:1;">
+                            <h4 style="margin:0 0 6px 0; color:#fff;">➕ Add New Partner / Creator</h4>
+                            <p class="panel-desc">Future modeler ya joiner (e.g. Ali) ko add karein taake unke banaye hue models ki earning alag calculate ho sake.</p>
+
+                            <form id="addCreatorForm" onsubmit="handleAddCreator(event)">
+                                <div class="form-group">
+                                    <label>Partner / Creator Full Name *</label>
+                                    <input type="text" id="creatorNameInput" required placeholder="e.g. Ali Raza / Muhammad Ali">
+                                </div>
+                                <div class="form-group">
+                                    <label>Role / Specialization *</label>
+                                    <input type="text" id="creatorRoleInput" required placeholder="e.g. 3D Locomotive Modeler / Route Builder">
+                                </div>
+                                <div class="form-group">
+                                    <label>Partner Type *</label>
+                                    <select id="creatorTypeInput" required>
+                                        <option value="external">👤 External Partner (Personal 100% solo models)</option>
+                                        <option value="core">👑 Core Team Member (Splits shared pool equally)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>WhatsApp Number (for sales notifications)</label>
+                                    <input type="text" id="creatorWhatsappInput" placeholder="e.g. 923001234567">
+                                </div>
+                                <div id="addCreatorAlert" style="display:none; padding:8px; border-radius:6px; margin-bottom:10px; font-size:0.85rem;"></div>
+                                <button type="submit" id="btnAddCreatorBtn" class="btn primary" style="width:100%; padding:10px;">
+                                    ➕ Save Partner to System
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Product Sales Breakdown Table -->
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius:14px; padding:18px;">
+                        <h4 style="margin:0 0 12px 0; color:#38bdf8;">📊 Product-Wise Sales &amp; Revenue Breakdown</h4>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                               <thead>
+                                   <tr>
+                                       <th>Product Name</th>
+                                       <th>Creator Attribution</th>
+                                       <th>Revenue Distribution</th>
+                                       <th>Units Sold</th>
+                                       <th>Total Revenue Generated</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="prodSalesTableBody">
+                                   <tr><td colspan="5" style="text-align:center; padding:16px; color:#94a3b8;">No products sold yet.</td></tr>
+                               </tbody>
                             </table>
                         </div>
                     </div>
@@ -713,8 +937,35 @@
                         <input type="text" id="editProdFileUrl" required>
                     </div>
                     <div class="form-group">
-                        <label>Product Image URL</label>
-                        <input type="text" id="editProdImageUrl">
+                        <label>Product Image (Browse from PC or Image Link) *</label>
+                        <div class="img-upload-box">
+                            <input type="file" id="editProdImageFile" accept="image/*" style="display:none;" onchange="handleImageFileSelected(this, 'editProdImageUrl', 'editProdImagePreview', 'editProdImageFileName')">
+                            <button type="button" class="btn secondary" style="padding:6px 12px; font-size:0.85rem;" onclick="document.getElementById('editProdImageFile').click()">📁 Browse Photo from PC</button>
+                            <span id="editProdImageFileName" style="font-size:0.8rem; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;">No file selected</span>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="text" id="editProdImageUrl" placeholder="Pictures & Videos/1.png" style="flex:1;" oninput="document.getElementById('editProdImagePreview').src = this.value || 'Pictures & Videos/1.png'">
+                            <img id="editProdImagePreview" src="Pictures & Videos/1.png" alt="Preview" class="img-preview-thumb" onerror="this.src='Pictures & Videos/1.png'">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Revenue Split Type *</label>
+                            <select id="editProdRevenueType" onchange="onRevenueTypeChanged('edit')">
+                                <option value="shared">🤝 Shared Pool (Equal 3-Way Split: Waqas, Asif, Usman)</option>
+                                <option value="solo">👤 Solo / External Creator (100% to Creator)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Model Creator / Author *</label>
+                            <select id="editProdCreatorName" onchange="onCreatorSelected('edit')">
+                                <option value="Core Team (Shared)">Core Team (Shared)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="editProdCreatorWhatsappGroup" style="display:none;">
+                        <label>Creator WhatsApp (Optional for sales alerts)</label>
+                        <input type="text" id="editProdCreatorWhatsapp" placeholder="e.g. 923001234567">
                     </div>
                     <div class="form-group">
                         <label>KUID Info (Optional)</label>
@@ -797,6 +1048,8 @@
             loadStoreStats();
             loadAdminOrders();
             loadAdminProducts();
+            loadCreatorsForSelect();
+            loadTeamEarnings();
             loadPaymentSettings();
             loadDeveloperDevices();
             loadAdminDownloads();
@@ -898,12 +1151,47 @@
                                 ? `<span class="badge-status status-approved">Approved</span>`
                                 : `<span class="badge-status status-rejected">Rejected</span>`;
 
+                        // WhatsApp Notification link
+                        const cleanWhatsapp = (o.customer_whatsapp || '').replace(/[^0-9]/g, '');
+                        const firstLic = (o.licenses && o.licenses[0]) ? o.licenses[0].license_key : '';
+                        const waMsg = encodeURIComponent(`Assalam-o-Alaikum ${o.customer_name}! Aapka Pak Trainz order (${o.order_number}) verify & approve ho gaya hai.\n\nAapki License Key: ${firstLic}\n\nClient App download karke Trainz me 1-click install karein: https://pak-trainz.vercel.app/`);
+                        const waBtn = cleanWhatsapp ? `
+                            <a href="https://wa.me/${cleanWhatsapp}?text=${waMsg}" target="_blank" class="btn secondary" style="display:inline-block; padding:4px 8px; font-size:0.75rem; background:rgba(37,211,102,0.15); color:#25d366; border-color:rgba(37,211,102,0.3); text-decoration:none; margin-top:6px;">
+                                📲 WhatsApp Buyer
+                            </a>
+                        ` : '';
+
                         const actions = isPending ? `
                             <button class="btn-approve" onclick="approveOrderItem(${o.id})">Approve</button>
                             <button class="btn-delete" onclick="rejectOrderItem(${o.id})">Reject</button>
                         ` : isApproved ? `
-                            <span style="color:#34d399; font-size:0.8rem; font-weight:bold;">License Active</span>
+                            <span style="color:#34d399; font-size:0.8rem; font-weight:bold;">License Active</span><br>
+                            ${waBtn}
                         ` : `<span style="color:#f87171; font-size:0.8rem;">Rejected</span>`;
+
+                        // Render licenses & PC lock info
+                        let licensesHtml = '';
+                        if (isApproved && o.licenses && o.licenses.length) {
+                            licensesHtml = o.licenses.map(lic => {
+                                const isLocked = !!lic.hwid_lock;
+                                const shortHwid = isLocked ? (lic.hwid_lock.length > 16 ? lic.hwid_lock.substring(0, 16) + '...' : lic.hwid_lock) : null;
+                                return `
+                                    <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 8px; margin-top:6px; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                                            <span style="font-family:monospace; color:#38bdf8; font-weight:bold;">🔑 ${escapeHtml(lic.license_key)}</span>
+                                            <button class="btn secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="navigator.clipboard.writeText('${escapeHtml(lic.license_key)}'); alert('License key copied: ${escapeHtml(lic.license_key)}');">📋 Copy</button>
+                                        </div>
+                                        <div style="margin-top:4px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                                            ${isLocked 
+                                                ? `<span style="color:#fbbf24;" title="${escapeHtml(lic.hwid_lock)}">🔒 PC Locked: ${escapeHtml(shortHwid)}</span>
+                                                   <button class="btn secondary" style="padding:2px 6px; font-size:0.7rem; background:rgba(245,158,11,0.2); color:#fbbf24; border-color:rgba(245,158,11,0.4);" onclick="handleResetLicenseHwid(${lic.id}, '${escapeHtml(o.order_number)}')">🔄 Reset PC / Transfer</button>`
+                                                : `<span style="color:#34d399;">✨ PC Unbound (Ready for install)</span>`
+                                            }
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                        }
 
                         return `
                             <tr>
@@ -914,12 +1202,13 @@
                                 <td>
                                     <strong>${escapeHtml(o.customer_name)}</strong><br>
                                     <span style="font-size:0.75rem; color:#cbd5e1;">${escapeHtml(o.customer_email)}</span><br>
-                                    <a href="https://wa.me/${escapeHtml(o.customer_whatsapp.replace(/[^0-9]/g, ''))}" target="_blank" style="color:#4ade80; font-size:0.75rem; text-decoration:none;">
+                                    <a href="https://wa.me/${escapeHtml(cleanWhatsapp)}" target="_blank" style="color:#4ade80; font-size:0.75rem; text-decoration:none;">
                                         💬 ${escapeHtml(o.customer_whatsapp)}
                                     </a>
                                 </td>
                                 <td>
                                     <span style="font-size:0.82rem;">${escapeHtml(o.items.join(', '))}</span>
+                                    ${licensesHtml}
                                 </td>
                                 <td>
                                     <strong style="color:#4ade80;">Rs. ${o.total_amount}</strong><br>
@@ -1000,6 +1289,12 @@
                                 <strong>${escapeHtml(p.title)}</strong><br>
                                 <span class="badge-cat" style="font-size:0.75rem;">${escapeHtml(p.category)}</span>
                                 <span style="font-size:0.75rem; color:#88a0ca; margin-left:4px;">${escapeHtml(p.version)}</span>
+                                <div style="margin-top:4px;">
+                                    ${p.revenue_type === 'solo' 
+                                        ? `<span class="creator-tag creator-external">👤 ${escapeHtml(p.creator_name || 'Solo Creator')}</span>` 
+                                        : `<span class="creator-tag creator-core">🤝 Shared (Core Team)</span>`
+                                    }
+                                </div>
                             </td>
                             <td>
                                 <strong style="color:#38bdf8;">${p.is_free ? 'FREE' : 'Rs. ' + p.price}</strong>
@@ -1032,6 +1327,9 @@
                 file_size: document.getElementById('prodSize').value.trim(),
                 file_url: document.getElementById('prodFileUrl').value.trim(),
                 image_url: document.getElementById('prodImageUrl').value.trim() || 'Pictures & Videos/1.png',
+                revenue_type: document.getElementById('prodRevenueType').value,
+                creator_name: document.getElementById('prodCreatorName').value,
+                creator_whatsapp: document.getElementById('prodCreatorWhatsapp').value.trim(),
                 kuid_info: document.getElementById('prodKuid').value.trim(),
                 description: document.getElementById('prodDesc').value.trim()
             };
@@ -1071,6 +1369,12 @@
             document.getElementById('editProdSize').value = prod.file_size || '';
             document.getElementById('editProdFileUrl').value = prod.file_url;
             document.getElementById('editProdImageUrl').value = prod.image_url;
+            const editThumb = document.getElementById('editProdImagePreview');
+            if (editThumb) editThumb.src = prod.image_url || 'Pictures & Videos/1.png';
+            document.getElementById('editProdRevenueType').value = prod.revenue_type || 'shared';
+            document.getElementById('editProdCreatorName').value = prod.creator_name || 'Core Team (Shared)';
+            document.getElementById('editProdCreatorWhatsapp').value = prod.creator_whatsapp || '';
+            onRevenueTypeChanged('edit');
             document.getElementById('editProdKuid').value = prod.kuid_info || '';
             document.getElementById('editProdDesc').value = prod.description || '';
 
@@ -1094,6 +1398,9 @@
                 file_size: document.getElementById('editProdSize').value.trim(),
                 file_url: document.getElementById('editProdFileUrl').value.trim(),
                 image_url: document.getElementById('editProdImageUrl').value.trim() || 'Pictures & Videos/1.png',
+                revenue_type: document.getElementById('editProdRevenueType').value,
+                creator_name: document.getElementById('editProdCreatorName').value,
+                creator_whatsapp: document.getElementById('editProdCreatorWhatsapp').value.trim(),
                 kuid_info: document.getElementById('editProdKuid').value.trim(),
                 description: document.getElementById('editProdDesc').value.trim()
             };
@@ -1206,6 +1513,281 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = '💾 Save Payment Accounts & Update Store';
+            }
+        }
+
+        // ──────────────────────────────────────────
+        // IMAGE UPLOAD HELPER (From PC)
+        // ──────────────────────────────────────────
+
+        async function handleImageFileSelected(input, targetUrlInputId, previewImgId, nameSpanId) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            if (nameSpanId) {
+                const nameEl = document.getElementById(nameSpanId);
+                if (nameEl) nameEl.textContent = '⏳ Uploading: ' + file.name;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result;
+                const previewEl = document.getElementById(previewImgId);
+                if (previewEl) previewEl.src = base64Data;
+
+                try {
+                    const res = await fetch('/api/admin/upload-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageData: base64Data, fileName: file.name })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.imageUrl) {
+                        const targetInput = document.getElementById(targetUrlInputId);
+                        if (targetInput) targetInput.value = data.imageUrl;
+                        if (previewEl) previewEl.src = data.imageUrl;
+                        if (nameSpanId) {
+                            const nameEl = document.getElementById(nameSpanId);
+                            if (nameEl) nameEl.textContent = '✅ ' + file.name;
+                        }
+                    } else {
+                        alert(data.error || 'Failed to upload image to server');
+                    }
+                } catch (err) {
+                    console.error('Image upload failed:', err);
+                    alert('Server error uploading image');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ──────────────────────────────────────────
+        // CREATORS, PARTNERS & TEAM EARNINGS
+        // ──────────────────────────────────────────
+
+        let globalCreatorsList = [];
+
+        async function loadCreatorsForSelect() {
+            try {
+                const res = await fetch('/api/admin/creators');
+                const data = await res.json();
+                if (data.success && data.creators) {
+                    globalCreatorsList = data.creators;
+                    const addSelect = document.getElementById('prodCreatorName');
+                    const editSelect = document.getElementById('editProdCreatorName');
+                    const optionsHtml = data.creators.map(c => `
+                        <option value="${escapeHtml(c.name)}" data-type="${c.type}" data-wa="${escapeHtml(c.whatsapp || '')}">
+                            ${escapeHtml(c.name)} (${c.type === 'core' ? 'Core Member' : 'External Partner'})
+                        </option>
+                    `).join('');
+
+                    const defaultOption = `<option value="Core Team (Shared)">Core Team (Shared)</option>`;
+                    if (addSelect) {
+                        const currentVal = addSelect.value;
+                        addSelect.innerHTML = defaultOption + optionsHtml;
+                        if (currentVal) addSelect.value = currentVal;
+                    }
+                    if (editSelect) {
+                        const currentVal = editSelect.value;
+                        editSelect.innerHTML = defaultOption + optionsHtml;
+                        if (currentVal) editSelect.value = currentVal;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading creators list:', err);
+            }
+        }
+
+        function onRevenueTypeChanged(formType) {
+            const revType = document.getElementById(formType === 'add' ? 'prodRevenueType' : 'editProdRevenueType').value;
+            const waGroup = document.getElementById(formType === 'add' ? 'prodCreatorWhatsappGroup' : 'editProdCreatorWhatsappGroup');
+            if (waGroup) {
+                waGroup.style.display = revType === 'solo' ? 'block' : 'none';
+            }
+        }
+
+        function onCreatorSelected(formType) {
+            const select = document.getElementById(formType === 'add' ? 'prodCreatorName' : 'editProdCreatorName');
+            const selectedOpt = select.options[select.selectedIndex];
+            if (selectedOpt) {
+                const wa = selectedOpt.getAttribute('data-wa');
+                const waInput = document.getElementById(formType === 'add' ? 'prodCreatorWhatsapp' : 'editProdCreatorWhatsapp');
+                if (wa && waInput && !waInput.value) {
+                    waInput.value = wa;
+                }
+            }
+        }
+
+        async function loadTeamEarnings() {
+            try {
+                const res = await fetch('/api/admin/team-earnings');
+                const data = await res.json();
+                if (data.success && data.earnings) {
+                    const e = data.earnings;
+                    const elTotalRev = document.getElementById('earnTotalRev');
+                    const elSharedPool = document.getElementById('earnSharedPool');
+                    const elPerCore = document.getElementById('earnPerCore');
+                    const elSoloPool = document.getElementById('earnSoloPool');
+
+                    if (elTotalRev) elTotalRev.textContent = `Rs. ${(e.totalRevenue || 0).toLocaleString()}`;
+                    if (elSharedPool) elSharedPool.textContent = `Rs. ${(e.sharedPool || 0).toLocaleString()}`;
+                    if (elPerCore) elPerCore.textContent = `Rs. ${(e.perCoreShare || 0).toLocaleString()}`;
+
+                    const soloPool = Math.max(0, (e.totalRevenue || 0) - (e.sharedPool || 0));
+                    if (elSoloPool) elSoloPool.textContent = `Rs. ${soloPool.toLocaleString()}`;
+
+                    const countSpan = document.getElementById('creatorsCountSpan');
+                    if (countSpan) countSpan.textContent = (e.creators || []).length;
+
+                    // Populate Creators Table
+                    const tbody = document.getElementById('creatorsTableBody');
+                    if (tbody) {
+                        if (!e.creators || !e.creators.length) {
+                            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No creators registered yet.</td></tr>';
+                        } else {
+                            tbody.innerHTML = e.creators.map(c => {
+                                const isCore = c.type === 'core';
+                                const badge = isCore 
+                                    ? `<span class="creator-tag creator-core">👑 CORE TEAM</span>` 
+                                    : `<span class="creator-tag creator-external">👤 EXTERNAL</span>`;
+                                const deleteBtn = isCore 
+                                    ? `<span style="font-size:0.75rem; color:#94a3b8;">Permanent</span>` 
+                                    : `<button class="btn secondary" style="padding:2px 8px; font-size:0.75rem; background:rgba(239,68,68,0.2); color:#fca5a5; border-color:rgba(239,68,68,0.3);" onclick="handleDeleteCreator(${c.id})">🗑️ Delete</button>`;
+
+                                return `
+                                    <tr>
+                                        <td>
+                                            <strong style="color:#fff;">${escapeHtml(c.name)}</strong>
+                                            ${c.role ? `<div style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(c.role)}</div>` : ''}
+                                        </td>
+                                        <td>${badge}</td>
+                                        <td>
+                                            ${c.whatsapp 
+                                                ? `<a href="https://wa.me/${escapeHtml(c.whatsapp.replace(/[^0-9]/g, ''))}" target="_blank" style="color:#4ade80; text-decoration:none; font-size:0.8rem;">💬 ${escapeHtml(c.whatsapp)}</a>` 
+                                                : `<span style="color:#64748b; font-size:0.75rem;">None</span>`
+                                            }
+                                        </td>
+                                        <td>
+                                            <span style="font-size:0.82rem; color:#cbd5e1;">${c.sales_count || 0} models</span>
+                                            ${c.solo_earnings ? `<div style="font-size:0.75rem; color:#c084fc;">Rs. ${(c.solo_earnings).toLocaleString()}</div>` : ''}
+                                        </td>
+                                        <td>
+                                            <strong style="color:#34d399; font-size:0.95rem;">Rs. ${(c.total_earnings || 0).toLocaleString()}</strong>
+                                            ${isCore ? `<div style="font-size:0.72rem; color:#94a3b8;">(Shared: Rs. ${(c.shared_earnings || 0).toLocaleString()})</div>` : ''}
+                                        </td>
+                                        <td>${deleteBtn}</td>
+                                    </tr>
+                                `;
+                            }).join('');
+                        }
+                    }
+
+                    // Populate Product Sales breakdown table
+                    const salesTbody = document.getElementById('prodSalesTableBody');
+                    if (salesTbody) {
+                        if (!e.productSales || !e.productSales.length) {
+                            salesTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px; color:#94a3b8;">No products sold yet.</td></tr>';
+                        } else {
+                            salesTbody.innerHTML = e.productSales.map(ps => `
+                                <tr>
+                                    <td><strong style="color:#fff;">${escapeHtml(ps.title)}</strong></td>
+                                    <td><span style="color:#38bdf8;">${escapeHtml(ps.creator)}</span></td>
+                                    <td>
+                                        ${ps.type === 'solo' 
+                                            ? `<span class="creator-tag creator-external">100% Solo to Creator</span>` 
+                                            : `<span class="creator-tag creator-core">3-Way Split (Waqas/Asif/Usman)</span>`
+                                        }
+                                    </td>
+                                    <td><span class="count-pill">🛒 ${ps.sales}</span></td>
+                                    <td><strong style="color:#4ade80;">Rs. ${ps.revenue.toLocaleString()}</strong></td>
+                                </tr>
+                            `).join('');
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading team earnings:', err);
+            }
+        }
+
+        async function handleAddCreator(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('addCreatorAlert');
+            const submitBtn = document.getElementById('btnAddCreatorBtn');
+            alertBox.style.display = 'none';
+
+            const payload = {
+                name: document.getElementById('creatorNameInput').value.trim(),
+                role: document.getElementById('creatorRoleInput').value.trim(),
+                type: document.getElementById('creatorTypeInput').value,
+                whatsapp: document.getElementById('creatorWhatsappInput').value.trim()
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+
+            try {
+                const res = await fetch('/api/admin/creators', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                    alertBox.style.color = '#86efac';
+                    alertBox.textContent = 'Partner added successfully!';
+                    document.getElementById('addCreatorForm').reset();
+                    loadCreatorsForSelect();
+                    loadTeamEarnings();
+                } else {
+                    alertBox.style.display = 'block';
+                    alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.textContent = data.error || 'Failed to add partner';
+                }
+            } catch (err) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#f87171';
+                alertBox.textContent = 'Server connection error';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '➕ Save Partner to System';
+            }
+        }
+
+        async function handleDeleteCreator(id) {
+            if (!confirm('Are you sure you want to remove this partner from the earnings system?')) return;
+            try {
+                const res = await fetch(`/api/admin/creators/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    loadCreatorsForSelect();
+                    loadTeamEarnings();
+                } else {
+                    alert(data.error || 'Failed to remove partner');
+                }
+            } catch (err) {
+                alert('Connection error');
+            }
+        }
+
+        async function handleResetLicenseHwid(licenseId, orderNumber) {
+            if (!confirm(`Kya aap is license ka PC Hardware Lock reset karna chahte hain? (Order: ${orderNumber})\n\nCustomer ab apne naye laptop/PC par Trainz Client App activate kar sakega, aur purana PC permanently lock ho jayega.`)) {
+                return;
+            }
+            try {
+                const res = await fetch(`/api/admin/licenses/${licenseId}/reset-hwid`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert('✅ PC Hardware Lock reset ho gaya! Customer ab naye PC par activate kar sakta hai.');
+                    loadAdminOrders();
+                } else {
+                    alert(data.error || 'Failed to reset PC lock');
+                }
+            } catch (err) {
+                alert('Connection error resetting license lock');
             }
         }
 
