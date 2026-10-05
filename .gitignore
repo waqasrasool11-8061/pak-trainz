@@ -9,3 +9,4 @@ node_modules/
 *.cdp
 "Pictures & Videos/*.mp4"
 "Pictures & Videos/*.cdp"
+client-app/dist/

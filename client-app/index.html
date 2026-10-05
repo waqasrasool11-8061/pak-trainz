@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRS DEP PAK - Trainz Addons Launcher</title>
+  <title>TRS DEP PAK - Official Trainz Addons Launcher</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,8 +11,8 @@
   <!-- Custom Titlebar -->
   <div class="titlebar">
     <div class="titlebar-brand">
-      <img src="../Pictures & Videos/Pak-Trainz.jpg" alt="Icon">
-      <span>TRS DEP PAK LAUNCHER &bull; Trainz Railroad Simulator</span>
+      <img src="assets/logo.jpg" alt="Icon" onerror="this.src='../Pictures & Videos/Pak-Trainz.jpg'">
+      <span>TRS DEP PAK LAUNCHER &bull; Pakistan Railways Content Manager</span>
     </div>
     <div class="titlebar-controls">
       <button class="ctrl-btn" id="btnMin">&minus;</button>
@@ -29,23 +29,20 @@
       <div>
         <div class="sidebar-header">
           <div class="brand-title">PAK TRAINZ</div>
-          <div class="brand-sub">Content Manager Injector</div>
+          <div class="brand-sub">Official Addons Launcher</div>
           <div id="devBadge" class="dev-badge-active" style="display:none;">
             👑 DEVELOPER MASTER MODE
           </div>
         </div>
 
         <nav class="nav-menu">
-          <div class="nav-item active" onclick="switchView('library')">
+          <div class="nav-item active" id="navItemLibrary" onclick="switchView('library')">
             <span>📦</span> My Addons Library
           </div>
-          <div class="nav-item" onclick="switchView('activate')">
+          <div class="nav-item" id="navItemActivate" onclick="switchView('activate')">
             <span>🔑</span> License Activation
           </div>
-          <div class="nav-item" onclick="switchView('developer')">
-            <span>👑</span> Developer Master Login
-          </div>
-          <div class="nav-item" onclick="switchView('settings')">
+          <div class="nav-item" id="navItemSettings" onclick="switchView('settings')">
             <span>⚙️</span> Trainz Path &amp; Settings
           </div>
         </nav>
@@ -53,7 +50,7 @@
 
       <div class="sidebar-footer">
         <div class="hwid-box">
-          <span>HARDWARE ID (HWID):</span>
+          <span>YOUR HARDWARE ID (HWID):</span>
           <span class="hwid-val" id="dispUserHwid">Detecting...</span>
         </div>
       </div>
@@ -78,11 +75,28 @@
       <div id="view-library" class="view-pane active">
         <div class="stage-header">
           <div>
-            <h1 class="stage-title">Addon Library</h1>
+            <h1 class="stage-title">My Addons Library</h1>
             <p class="stage-sub">Your purchased Pakistan Railways locomotives, coaches and routes ready for 1-click injection.</p>
           </div>
-          <button class="btn-install" style="width:auto; padding:8px 16px;" onclick="refreshLibrary()">
-            🔄 Refresh Content
+          <div style="display:flex; gap:10px;">
+            <button class="btn-install" style="width:auto; padding:8px 14px; background:#1e293b; border:1px solid rgba(255,255,255,0.1);" onclick="handleBrowseFolder()">
+              📁 Trainz Folder
+            </button>
+            <button class="btn-install" style="width:auto; padding:8px 16px;" onclick="refreshLibrary()">
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Current Trainz Path Quick Bar -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+            <span style="font-size:1.1rem;">🚂</span>
+            <span style="font-size:0.82rem; color:#94a3b8;">Install Target:</span>
+            <span id="libTrainzPathDisp" style="font-size:0.82rem; color:#38bdf8; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:500px;">Detecting...</span>
+          </div>
+          <button onclick="handleBrowseFolder()" style="background:transparent; border:none; color:#38bdf8; font-size:0.8rem; cursor:pointer; text-decoration:underline; font-weight:600;">
+            Browse / Change &rarr;
           </button>
         </div>
 
@@ -90,9 +104,12 @@
           <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; color:#94a3b8;">
             <div style="font-size:2.5rem; margin-bottom:12px;">🚂</div>
             <h3>No Addons Activated Yet</h3>
-            <p style="font-size:0.9rem; margin-top:6px; max-width:480px; margin-left:auto; margin-right:auto;">
-              Click <strong>"License Activation"</strong> to enter your purchase key, or if you are part of the core team (Waqas, Asif, Usman), click <strong>"Developer Master Login"</strong> to unlock everything!
+            <p style="font-size:0.9rem; margin-top:8px; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.5;">
+              Please go to <strong>"License Activation"</strong> tab and enter your purchase License Key to load your authentic Pakistan Railways locomotives and coaches.
             </p>
+            <button class="btn-install" style="margin-top:16px; width:auto; padding:10px 24px; display:inline-block;" onclick="switchView('activate')">
+              🔑 Go to License Activation
+            </button>
           </div>
         </div>
       </div>
@@ -107,6 +124,23 @@
         </div>
 
         <div class="form-card">
+          <!-- Trainz Directory Selection Field -->
+          <div class="form-group" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 14px; margin-bottom:20px;">
+            <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span>📁 Trainz Installation Directory</span>
+              <span id="actTrainzStatusBadge" style="font-size:0.75rem; color:#4ade80;">Auto-detected</span>
+            </label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="actTrainzPath" readonly placeholder="Detecting Trainz directory..." style="font-size:0.85rem; background:rgba(0,0,0,0.3);">
+              <button type="button" class="btn-install" style="width:auto; padding:0 14px; font-size:0.85rem; white-space:nowrap;" onclick="handleBrowseFolder()">
+                📁 Browse Folder
+              </button>
+            </div>
+            <small id="actTrainzHint" style="color:#94a3b8; font-size:0.75rem; margin-top:6px; display:block;">
+              Make sure this folder points to your Trainz 2019 or Trainz 2022 game directory.
+            </small>
+          </div>
+
           <form id="activateForm" onsubmit="handleActivateLicense(event)">
             <div class="form-group">
               <label>Customer Email Address *</label>
@@ -127,22 +161,15 @@
               🚀 Verify License &amp; Bind to this PC
             </button>
           </form>
-
-          <div style="text-align:center; margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
-            <span style="font-size:0.85rem; color:#94a3b8;">Core Team Developer?</span>
-            <a href="javascript:void(0)" onclick="switchView('developer')" style="color:#c084fc; font-weight:bold; font-size:0.85rem; margin-left:6px; text-decoration:none;">
-              Switch to Master Developer Login &rarr;
-            </a>
-          </div>
         </div>
       </div>
 
-      <!-- VIEW 3: DEVELOPER MASTER LOGIN (WAQAS, ASIF, USMAN) -->
+      <!-- VIEW 3: DEVELOPER MASTER LOGIN (HIDDEN FROM CUSTOMERS, ACCESSIBLE VIA CTRL+SHIFT+D) -->
       <div id="view-developer" class="view-pane">
         <div class="stage-header">
           <div>
-            <h1 class="stage-title">👑 Core Team Master Login</h1>
-            <p class="stage-sub">Waqas Rasool (Rawalpindi), Asif Khan (Karachi) &amp; Usman Mani (Qatar) Master Access</p>
+            <h1 class="stage-title">👑 Lead Developer Master Login</h1>
+            <p class="stage-sub">Waqas Rasool - Master Developer Mode &amp; Diagnostic Access</p>
           </div>
         </div>
 
@@ -150,25 +177,25 @@
           <div style="background:rgba(192, 132, 252, 0.1); border:1px solid rgba(192, 132, 252, 0.3); border-radius:10px; padding:14px; margin-bottom:20px;">
             <div style="font-weight:bold; color:#d8b4fe; margin-bottom:4px;">👑 Unrestricted Developer Mode</div>
             <p style="font-size:0.82rem; color:#cbd5e1; line-height:1.5;">
-              Logging in as a Developer unlocks <strong>all 6+ locomotive packs, coaches, and routes</strong> with zero hardware lock restrictions across all your PCs, laptops, and workstations.
+              Logging in as Lead Developer unlocks all locomotive packs, coaches, and routes with zero hardware lock restrictions.
             </p>
           </div>
 
           <form id="devLoginForm" onsubmit="handleDevLogin(event)">
             <div class="form-group">
-              <label>Admin / Developer Username *</label>
-              <input type="text" id="devUser" required placeholder="e.g. admin">
+              <label>Developer Username *</label>
+              <input type="text" id="devUser" required placeholder="admin">
             </div>
 
             <div class="form-group">
               <label>Password *</label>
-              <input type="password" id="devPass" required placeholder="Default: trainz123">
+              <input type="password" id="devPass" required placeholder="Password">
             </div>
 
             <div id="devAlert" style="display:none; padding:12px; border-radius:8px; margin-bottom:14px; font-size:0.88rem;"></div>
 
             <button type="submit" id="btnDevSubmit" class="btn-install" style="background:linear-gradient(135deg, #a855f7, #7c3aed); padding:12px;">
-              👑 Activate Developer Master Mode
+              👑 Activate Developer Mode
             </button>
           </form>
         </div>
@@ -217,6 +244,9 @@
     <div class="trainz-status">
       <span class="status-dot" id="statusDot"></span>
       <span id="trainzStatusText">Trainz: Detecting...</span>
+      <button onclick="handleBrowseFolder()" style="background:none; border:none; color:#38bdf8; font-size:0.78rem; cursor:pointer; text-decoration:underline; margin-left:8px;">
+        [📁 Select Folder]
+      </button>
     </div>
 
     <button class="btn-launch" onclick="handleLaunchTrainz()">

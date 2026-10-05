@@ -3,12 +3,43 @@
   "version": "1.0.0",
   "description": "TRS DEP PAK Official Trainz Railroad Simulator Addons Launcher & DRM Client",
   "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "author": "Pak Trainz Developers (Waqas Rasool, Asif Khan, Usman Mani)",
+  "author": "Waqas Rasool",
   "license": "Proprietary",
-  "dependencies": {
-    "electron": "^33.2.0"
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "build": {
+    "appId": "com.paktrainz.launcher",
+    "productName": "TRS DEP PAK Launcher",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TRS DEP PAK Launcher",
+      "artifactName": "TRS-DEP-PAK-Setup.${ext}"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!*.zip"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-packager": "^17.1.2"
   }
 }

@@ -20,6 +20,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnMax')?.addEventListener('click', () => ipc?.invoke('window-maximize'));
   document.getElementById('btnClose')?.addEventListener('click', () => ipc?.invoke('window-close'));
 
+  // Secret Lead Developer Hotkey (Ctrl + Shift + D)
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+      switchView('developer');
+    }
+  });
+
   // Get HWID
   if (ipc) {
     try {
@@ -30,7 +37,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   } else {
     currentHWID = 'HWID-BROWSER-DEMO';
   }
-  document.getElementById('dispUserHwid').innerText = currentHWID;
+  const hwidEl = document.getElementById('dispUserHwid');
+  if (hwidEl) hwidEl.innerText = currentHWID;
 
   // Detect Trainz
   await checkTrainzDetection();
@@ -44,28 +52,54 @@ function switchView(viewName) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.view-pane').forEach(el => el.classList.remove('active'));
 
-  const navs = document.querySelectorAll('.nav-item');
-  if (viewName === 'library') navs[0]?.classList.add('active');
-  if (viewName === 'activate') navs[1]?.classList.add('active');
-  if (viewName === 'developer') navs[2]?.classList.add('active');
-  if (viewName === 'settings') navs[3]?.classList.add('active');
+  if (viewName === 'library') {
+    document.getElementById('navItemLibrary')?.classList.add('active');
+  } else if (viewName === 'activate') {
+    document.getElementById('navItemActivate')?.classList.add('active');
+  } else if (viewName === 'settings') {
+    document.getElementById('navItemSettings')?.classList.add('active');
+  }
 
   const pane = document.getElementById(`view-${viewName}`);
   if (pane) pane.classList.add('active');
 }
 
-// Trainz Detection
-async function checkTrainzDetection() {
+// Update all UI elements showing the Trainz Path
+function syncTrainzPathUI(folderPath, isValid = true, versionNote = '') {
   const statusEl = document.getElementById('trainzStatusText');
   const pathInput = document.getElementById('cfgTrainzPath');
+  const actPathInput = document.getElementById('actTrainzPath');
+  const libPathDisp = document.getElementById('libTrainzPathDisp');
   const detectStatus = document.getElementById('trainzDetectStatus');
+  const actBadge = document.getElementById('actTrainzStatusBadge');
 
+  if (pathInput) pathInput.value = folderPath;
+  if (actPathInput) actPathInput.value = folderPath;
+  if (libPathDisp) libPathDisp.innerText = folderPath || 'Not Selected (Click Browse)';
+
+  if (folderPath) {
+    if (statusEl) statusEl.innerText = `Trainz: ${versionNote || 'Configured'}`;
+    if (detectStatus) detectStatus.innerText = isValid ? `Active folder: ${folderPath}` : `Notice: TrainzUtil.exe not found in this folder.`;
+    if (actBadge) {
+      actBadge.innerText = isValid ? 'Ready' : 'Check Folder';
+      actBadge.style.color = isValid ? '#4ade80' : '#f59e0b';
+    }
+  } else {
+    if (statusEl) statusEl.innerText = 'Trainz: Not Found (Click Browse)';
+    if (detectStatus) detectStatus.innerText = 'TrainzUtil.exe not found in default paths. Please click Browse.';
+    if (actBadge) {
+      actBadge.innerText = 'Not Selected';
+      actBadge.style.color = '#ef4444';
+    }
+  }
+}
+
+// Trainz Detection
+async function checkTrainzDetection() {
   const savedPath = localStorage.getItem('trs_trainz_path');
   if (savedPath) {
     currentTrainzInfo = { path: savedPath };
-    pathInput.value = savedPath;
-    statusEl.innerText = 'Trainz: Configured';
-    detectStatus.innerText = 'Path loaded from settings.';
+    syncTrainzPathUI(savedPath, true, 'Configured');
     return;
   }
 
@@ -74,42 +108,42 @@ async function checkTrainzDetection() {
       const detected = await ipc.invoke('detect-trainz');
       if (detected) {
         currentTrainzInfo = detected;
-        pathInput.value = detected.path;
-        statusEl.innerText = `Trainz: ${detected.version || 'Detected'}`;
-        detectStatus.innerText = `Auto-detected: ${detected.path}`;
+        syncTrainzPathUI(detected.path, true, detected.version || 'Auto-Detected');
       } else {
-        statusEl.innerText = 'Trainz: Not Detected (Please set folder)';
-        detectStatus.innerText = 'TrainzUtil.exe not found in default paths. Please click Browse.';
+        syncTrainzPathUI('', false);
       }
     } catch (e) {
-      statusEl.innerText = 'Trainz: Detection Error';
+      syncTrainzPathUI('', false);
     }
   } else {
-    statusEl.innerText = 'Trainz: Ready (Desktop Mode)';
+    syncTrainzPathUI('C:\\Program Files\\N3V Games\\Trainz Railroad Simulator 2019', true, 'Demo Mode');
   }
 }
 
 // Browse folder
 async function handleBrowseFolder() {
   if (!ipc) {
-    alert("Folder selection dialog is active in Windows Desktop mode.");
+    const manual = prompt("Enter Trainz installation folder path:", localStorage.getItem('trs_trainz_path') || "C:\\Program Files\\N3V Games\\Trainz Railroad Simulator 2019");
+    if (manual) {
+      currentTrainzInfo = { path: manual, isValid: true };
+      localStorage.setItem('trs_trainz_path', manual);
+      syncTrainzPathUI(manual, true, 'Custom Path');
+    }
     return;
   }
 
   const result = await ipc.invoke('browse-trainz-folder');
   if (result && result.path) {
     currentTrainzInfo = result;
-    document.getElementById('cfgTrainzPath').value = result.path;
     localStorage.setItem('trs_trainz_path', result.path);
-    document.getElementById('trainzStatusText').innerText = 'Trainz: Custom Directory';
-    document.getElementById('trainzDetectStatus').innerText = result.isValid ? 'Valid Trainz directory with TrainzUtil.exe!' : 'Notice: TrainzUtil.exe not found in this folder.';
+    syncTrainzPathUI(result.path, result.isValid, 'Selected Folder');
   }
 }
 
 // Save Settings
 function saveSettings() {
-  const url = document.getElementById('cfgServerUrl').value.trim();
-  const path = document.getElementById('cfgTrainzPath').value.trim();
+  const url = document.getElementById('cfgServerUrl')?.value.trim();
+  const path = document.getElementById('cfgTrainzPath')?.value.trim();
 
   if (url) {
     serverBaseUrl = url.replace(/\/$/, '');
@@ -118,6 +152,7 @@ function saveSettings() {
 
   if (path) {
     localStorage.setItem('trs_trainz_path', path);
+    syncTrainzPathUI(path, true, 'Saved');
   }
 
   alert("Settings saved successfully!");
@@ -147,12 +182,11 @@ async function handleActivateLicense(e) {
       alertBox.style.display = 'block';
       alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
       alertBox.style.color = '#86efac';
-      alertBox.innerText = `License Valid! ${data.is_developer ? '👑 Master Bypass Active' : 'Locked to this PC'}`;
+      alertBox.innerText = `License Valid! ${data.is_developer ? '👑 Master Mode Active' : 'Locked to this PC'}`;
 
       if (data.products && Array.isArray(data.products)) {
         unlockedProducts = data.products;
       } else if (data.product) {
-        // Add single product if not already in library
         if (!unlockedProducts.find(p => p.id === data.product.id)) {
           unlockedProducts.push(data.product);
         }
@@ -182,7 +216,7 @@ async function handleActivateLicense(e) {
   }
 }
 
-// Developer Master Login (Waqas, Asif, Usman)
+// Developer Master Login (Waqas Rasool)
 async function handleDevLogin(e) {
   e.preventDefault();
   const user = document.getElementById('devUser').value.trim();
@@ -232,7 +266,7 @@ async function handleDevLogin(e) {
     alertBox.innerText = 'Connection error to master server.';
   } finally {
     btn.disabled = false;
-    btn.innerText = '👑 Activate Developer Master Mode';
+    btn.innerText = '👑 Activate Developer Mode';
   }
 }
 
@@ -244,9 +278,12 @@ function renderAddonsGrid() {
       <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; color:#94a3b8;">
         <div style="font-size:2.5rem; margin-bottom:12px;">🚂</div>
         <h3>No Addons Activated Yet</h3>
-        <p style="font-size:0.9rem; margin-top:6px; max-width:480px; margin-left:auto; margin-right:auto;">
-          Click <strong>"License Activation"</strong> to enter your purchase key, or click <strong>"Developer Master Login"</strong> to unlock all models.
+        <p style="font-size:0.9rem; margin-top:8px; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.5;">
+          Please go to <strong>"License Activation"</strong> tab and enter your purchase License Key to display your purchased locomotives and coaches.
         </p>
+        <button class="btn-install" style="margin-top:16px; width:auto; padding:10px 24px; display:inline-block;" onclick="switchView('activate')">
+          🔑 Go to License Activation
+        </button>
       </div>
     `;
     return;
@@ -256,12 +293,12 @@ function renderAddonsGrid() {
 
   grid.innerHTML = unlockedProducts.map(p => {
     const isInstalled = installedKeys.includes(p.id);
-    const imageUrl = p.image_url ? (p.image_url.startsWith('http') ? p.image_url : `${serverBaseUrl}/${p.image_url}`) : '../Pictures & Videos/1.png';
+    const imageUrl = p.image_url ? (p.image_url.startsWith('http') ? p.image_url : `${serverBaseUrl}/${p.image_url}`) : 'assets/default-thumb.png';
 
     return `
       <div class="addon-card">
         <div class="addon-thumb">
-          <img src="${imageUrl}" alt="${p.title}" onerror="this.src='../Pictures & Videos/1.png'">
+          <img src="${imageUrl}" alt="${p.title}" onerror="this.src='assets/default-thumb.png'">
           <span class="addon-badge">${p.badge || (isDeveloperMode ? 'MASTER' : 'OFFICIAL')}</span>
         </div>
         <div class="addon-body">
@@ -354,7 +391,7 @@ async function handleInstallAddon(productId) {
 async function handleLaunchTrainz() {
   const trainzPath = currentTrainzInfo?.path || localStorage.getItem('trs_trainz_path');
   if (!trainzPath) {
-    alert("Trainz installation directory is not configured. Please go to Settings & set your Trainz directory.");
+    alert("Trainz installation directory is not configured. Please select your Trainz directory.");
     switchView('settings');
     return;
   }
@@ -386,6 +423,11 @@ function loadSavedSession() {
       document.getElementById('devBadge').style.display = 'inline-flex';
     }
     renderAddonsGrid();
+
+    // If customer has no addons loaded yet, guide them directly to License Activation
+    if (!unlockedProducts.length && !isDeveloperMode) {
+      switchView('activate');
+    }
   } catch (e) {
     console.error("Session load err:", e);
   }

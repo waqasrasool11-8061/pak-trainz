@@ -1,17 +1,39 @@
 ========================================================================
-   TRS DEP PAK - Trainz Railroad Simulator Addons Launcher (Phase 3)
-   Official Anti-Piracy Launcher & Content Manager Auto-Injector
+   TRS DEP PAK - Trainz Railroad Simulator Official Addons Launcher
+   Lead Developer & Creator: Waqas Rasool
+   Website: https://pak-trainz.vercel.app/
 ========================================================================
 
-How to Use:
-1. Double-click "run-launcher.bat" to start the Launcher on Windows.
-2. Go to "License Activation" tab.
-3. Enter your Customer Email and the License Key you received after purchase.
-4. Click "Verify License & Bind to this PC".
-5. Go to "My Addons Library" and click "🚀 1-Click Install into Trainz".
-   Your locomotive / coach will be automatically injected into Trainz Content Manager!
-6. Click "🚀 Launch Trainz Simulator" to drive your train!
+Welcome to TRS DEP PAK Official Launcher!
+Follow these simple steps to install and enjoy your Trainz addons:
 
-For Core Developers (Waqas Rasool, Asif Khan, Usman Mani):
-Click "👑 Developer Master Login" on the left menu, enter your credentials or
-use master key "TRS-MASTER-BYPASS" to unlock ALL models with zero restrictions!
+STEP 1: INSTALL & OPEN LAUNCHER
+  - Run the TRS DEP PAK Launcher on your Windows desktop.
+  - No complicated technical setup needed.
+
+STEP 2: ACTIVATE YOUR LICENSE
+  - In the "License Activation" tab:
+  - Enter your registered Customer Email.
+  - Enter your License Key (received after purchase on pak-trainz.vercel.app).
+  - Click "Verify License & Bind to this PC".
+  - Your license will securely bind to this computer.
+
+STEP 3: CONFIRM TRAINZ DIRECTORY
+  - The launcher automatically scans and detects your Trainz simulator.
+  - If your Trainz is installed in a custom location (e.g. D:, E:, Steam),
+    click "Browse Trainz Folder" to select your folder.
+
+STEP 4: 1-CLICK ADDON INSTALLATION
+  - Go to "My Addons Library".
+  - All your purchased locomotives, coaches, and routes will be listed.
+  - Click "1-Click Install into Trainz".
+  - The launcher injects the content directly into Trainz Content Manager!
+
+STEP 5: LAUNCH & DRIVE
+  - Click "Launch Trainz Simulator" at the bottom right to jump right in.
+  - Enjoy authentic Pakistan Railways locomotives and coaches!
+
+------------------------------------------------------------------------
+Official Support: https://pak-trainz.vercel.app/
+Lead Developer: Waqas Rasool
+========================================================================

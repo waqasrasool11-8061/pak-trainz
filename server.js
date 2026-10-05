@@ -182,9 +182,12 @@ app.get("/api/download/secure/:licenseKey", async (req, res) => {
 
 // Direct Download Windows Client App Package
 app.get("/api/download/client-app", (req, res) => {
-  const filePath = path.join(__dirname, "public", "downloads", "TRS-DEP-PAK-Launcher.zip");
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, "TRS-DEP-PAK-Launcher.zip");
+  const exePath = path.join(__dirname, "public", "downloads", "TRS-DEP-PAK-Setup.exe");
+  const zipPath = path.join(__dirname, "public", "downloads", "TRS-DEP-PAK-Launcher.zip");
+  if (fs.existsSync(exePath)) {
+    res.download(exePath, "TRS-DEP-PAK-Setup.exe");
+  } else if (fs.existsSync(zipPath)) {
+    res.download(zipPath, "TRS-DEP-PAK-Launcher.zip");
   } else {
     res.status(404).send("Client launcher package not found.");
   }

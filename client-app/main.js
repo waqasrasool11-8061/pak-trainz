@@ -80,7 +80,7 @@ function createWindow() {
     frame: false,
     backgroundColor: '#0b1120',
     title: 'TRS DEP PAK Launcher - Trainz Railroad Simulator Addons Manager',
-    icon: path.join(__dirname, '..', 'Pictures & Videos', 'Pak-Trainz.jpg'),
+    icon: fs.existsSync(path.join(__dirname, 'assets', 'logo.jpg')) ? path.join(__dirname, 'assets', 'logo.jpg') : path.join(__dirname, '..', 'Pictures & Videos', 'Pak-Trainz.jpg'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
