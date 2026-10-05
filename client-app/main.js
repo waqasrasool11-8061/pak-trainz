@@ -179,31 +179,65 @@ ipcMain.handle('inject-addon-into-trainz', async (event, args) => {
     const tempFileName = `trs_addon_${crypto.randomBytes(6).toString('hex')}.tmp`;
     const tempFilePath = path.join(os.tmpdir(), tempFileName);
 
+    // Format cloud links (Google Drive, Dropbox) into direct download streams
+    function formatDirectCloudUrl(rawUrl) {
+      if (!rawUrl) return rawUrl;
+      let url = rawUrl.trim();
+      if (url.includes('drive.google.com')) {
+        const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (fileIdMatch && fileIdMatch[1]) {
+          return `https://drive.google.com/uc?export=download&confirm=t&id=${fileIdMatch[1]}`;
+        }
+      }
+      if (url.includes('dropbox.com')) {
+        if (url.includes('dl=0')) return url.replace('dl=0', 'dl=1');
+        if (!url.includes('dl=1')) return url + (url.includes('?') ? '&dl=1' : '?dl=1');
+      }
+      return url;
+    }
+
+    const directUrl = formatDirectCloudUrl(downloadUrl);
+
     await new Promise((resolve, reject) => {
-      // Determine if local file or remote URL
-      if (downloadUrl.startsWith('http://') || downloadUrl.startsWith('https://')) {
-        const client = downloadUrl.startsWith('https') ? https : http;
-        const fileStream = fs.createWriteStream(tempFilePath);
-        client.get(downloadUrl, (res) => {
-          if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-            // Follow redirect
-            client.get(res.headers.location, (redRes) => {
-              redRes.pipe(fileStream);
-              fileStream.on('finish', () => fileStream.close(resolve));
-            }).on('error', reject);
-          } else {
+      if (directUrl.startsWith('http://') || directUrl.startsWith('https://')) {
+        function fetchRemoteFile(currentUrl, redirectCount = 0) {
+          if (redirectCount > 6) {
+            return reject(new Error('Too many redirects while downloading cloud content'));
+          }
+
+          const client = currentUrl.startsWith('https') ? https : http;
+          client.get(currentUrl, (res) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+              let nextUrl = res.headers.location;
+              if (!nextUrl.startsWith('http')) {
+                const u = new URL(currentUrl);
+                nextUrl = `${u.origin}${nextUrl}`;
+              }
+              return fetchRemoteFile(nextUrl, redirectCount + 1);
+            }
+
+            if (res.statusCode !== 200) {
+              return reject(new Error(`Server responded with HTTP ${res.statusCode}`));
+            }
+
+            const fileStream = fs.createWriteStream(tempFilePath);
             res.pipe(fileStream);
             fileStream.on('finish', () => fileStream.close(resolve));
-          }
-        }).on('error', reject);
+            fileStream.on('error', (err) => {
+              fs.unlink(tempFilePath, () => {});
+              reject(err);
+            });
+          }).on('error', reject);
+        }
+
+        fetchRemoteFile(directUrl);
       } else {
-        // Local path copy for test
-        const localSrc = path.isAbsolute(downloadUrl) ? downloadUrl : path.join(__dirname, '..', downloadUrl);
+        const localSrc = path.isAbsolute(directUrl) ? directUrl : path.join(__dirname, '..', directUrl);
         if (fs.existsSync(localSrc)) {
           fs.copyFileSync(localSrc, tempFilePath);
           resolve();
         } else {
-          reject(new Error(`File source not found: ${downloadUrl}`));
+          reject(new Error(`File source not found: ${directUrl}`));
         }
       }
     });

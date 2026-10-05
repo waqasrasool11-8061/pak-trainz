@@ -18,7 +18,6 @@
             <a href="#home">Home</a>
             <a href="gallery.html">Gallery</a>
             <a href="videos.html">Videos</a>
-            <a href="#downloads">Downloads</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
             <a href="admin.html" class="nav-admin-link">⚙️ Admin</a>
@@ -144,22 +143,6 @@
             </div>
         </div>
 
-        <!-- Downloads Section -->
-        <section class="content-block" id="downloads">
-            <div class="section-heading">
-                <p class="eyebrow">Downloads</p>
-                <h2>Download Center</h2>
-                <p>Authentic Pakistan Railways Locomotive packs (.cdp), rolling stocks, dependencies & route assets.</p>
-            </div>
-
-            <!-- Dynamic Downloads Container -->
-            <div id="dynamicDownloads" class="download-list">
-                <!-- Populated dynamically via JS with live counts -->
-                <div style="text-align:center; padding: 30px; color: #a5b7d6;">
-                    Loading authentic Pakistan Railways add-on packs...
-                </div>
-            </div>
-        </section>
 
         <!-- About Section -->
         <section class="about-section" id="about">
@@ -224,108 +207,6 @@
         });
         startHeroAutoplay();
 
-        // 2. Fetch and Render Dynamic Downloads
-        async function loadDownloads() {
-            const container = document.getElementById('dynamicDownloads');
-            try {
-                const res = await fetch('/api/downloads');
-                const data = await res.json();
-                if (!data.success || !data.downloads || data.downloads.length === 0) {
-                    renderFallbackDownloads(container);
-                    return;
-                }
-
-                // Group by Category
-                const groups = {};
-                data.downloads.forEach(item => {
-                    const cat = item.category || 'General';
-                    if (!groups[cat]) groups[cat] = [];
-                    groups[cat].push(item);
-                });
-
-                let html = '';
-                for (const [category, items] of Object.entries(groups)) {
-                    html += `
-                        <div class="download-group-block">
-                            <h3 class="download-category-header">🚂 ${escapeHtml(category)}</h3>
-                            <div class="download-items-grid">
-                                ${items.map(item => `
-                                    <div class="download-card" id="dl-card-${item.id}">
-                                        <div class="download-card-body">
-                                            <div class="download-card-top">
-                                                <span class="badge-cat">${escapeHtml(item.category)}</span>
-                                                <span class="badge-version">${escapeHtml(item.version || 'TRS19 / TRS22')}</span>
-                                            </div>
-                                            <h4 class="download-card-title">${escapeHtml(item.title)}</h4>
-                                            ${item.description ? `<p class="download-card-desc">${escapeHtml(item.description)}</p>` : ''}
-                                            
-                                            <div class="download-card-footer">
-                                                <div class="download-meta-info">
-                                                    ${item.file_size ? `<span class="size-pill">💾 ${escapeHtml(item.file_size)}</span>` : ''}
-                                                    <span class="count-pill" id="counter-${item.id}">📥 ${item.download_count} downloads</span>
-                                                </div>
-                                                <a class="btn-download" href="${encodeURI(item.file_url)}" download="${escapeHtml(item.title)}" onclick="trackDownload(${item.id})">
-                                                    Download CDP
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-                container.innerHTML = html;
-            } catch (err) {
-                console.warn('API error, using fallback:', err);
-                renderFallbackDownloads(container);
-            }
-        }
-
-        // Live download counter tracker
-        async function trackDownload(id) {
-            try {
-                const res = await fetch(`/api/download/${id}/click`, { method: 'POST' });
-                const data = await res.json();
-                if (data.success && typeof data.count === 'number') {
-                    const counterEl = document.getElementById(`counter-${id}`);
-                    if (counterEl) {
-                        counterEl.textContent = `📥 ${data.count} downloads`;
-                        counterEl.classList.add('pulse-update');
-                        setTimeout(() => counterEl.classList.remove('pulse-update'), 600);
-                    }
-                }
-            } catch (e) {
-                console.log('Download track clicked:', id);
-            }
-        }
-
-        function renderFallbackDownloads(container) {
-            container.innerHTML = `
-                <div class="download-group">
-                    <span class="download-title">Locomotives</span>
-                    <div class="download-sublist">
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/ALU%2024.cdp" download onclick="trackDownload(1)"><span class="download-title">ALU 24.cdp</span><span class="download-meta">16.6 MB • CDP</span></a>
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/ALU%2024%20dependencies.cdp" download onclick="trackDownload(2)"><span class="download-title">ALU 24 dependencies.cdp</span><span class="download-meta">63.8 MB • CDP</span></a>
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/HGMU%2030%20-%20R%20(8213).cdp" download onclick="trackDownload(3)"><span class="download-title">HGMU 30 - R (8213).cdp</span><span class="download-meta">200.5 MB • CDP</span></a>
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/HGMU-30%20dependancies.cdp" download onclick="trackDownload(4)"><span class="download-title">HGMU-30 dependancies.cdp</span><span class="download-meta">225.5 MB • CDP</span></a>
-                    </div>
-                </div>
-                <div class="download-group" style="margin-top:15px;">
-                    <span class="download-title">Routes</span>
-                    <div class="download-sublist">
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/Pakistan%20Railways.cdp" download onclick="trackDownload(5)"><span class="download-title">Pakistan Railways.cdp</span><span class="download-meta">2.2 MB • CDP</span></a>
-                    </div>
-                </div>
-                <div class="download-group" style="margin-top:15px;">
-                    <span class="download-title">Rolling Stock</span>
-                    <div class="download-sublist">
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/AC-STANDARD%208032-5.cdp" download onclick="trackDownload(6)"><span class="download-title">AC-STANDARD 8032-5.cdp</span><span class="download-meta">27.8 MB • CDP</span></a>
-                        <a class="download-item download-file" href="Pictures%20%26%20Videos/Power%20Van.cdp" download onclick="trackDownload(7)"><span class="download-title">Power Van.cdp</span><span class="download-meta">120.6 MB • CDP</span></a>
-                    </div>
-                </div>
-            `;
-        }
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -423,7 +304,6 @@
 
         // Initialize on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            loadDownloads();
         });
     </script>
 </body>
